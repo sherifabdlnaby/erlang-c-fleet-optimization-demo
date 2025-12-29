@@ -5,6 +5,7 @@ function Tabs({ children, defaultTab = 0 }) {
   const tabs = useMemo(() => {
     return React.Children.map(children, child => ({
       label: child.props.label,
+      description: child.props.description || '',
       content: child,
       id: child.props.id || child.props.label.toLowerCase().replace(/\s+/g, '-')
     }));
@@ -49,13 +50,30 @@ function Tabs({ children, defaultTab = 0 }) {
     <div className="tabs-container">
       <div className="tabs-header">
         {tabs.map((tab, index) => (
-          <button
-            key={index}
-            className={`tab-button ${activeTab === index ? 'active' : ''}`}
-            onClick={() => handleTabChange(index)}
-          >
-            {tab.label}
-          </button>
+          <div key={index} className="tab-header-item">
+            <button
+              className={`tab-button ${activeTab === index ? 'active' : ''}`}
+              onClick={() => handleTabChange(index)}
+            >
+              {tab.label}
+            </button>
+            {tab.description && (() => {
+              const parts = tab.description.split('. ');
+              const title = parts[0] + (parts.length > 1 ? '.' : '');
+              const description = parts.slice(1).join('. ');
+              return (
+                <div className={`tab-description ${activeTab === index ? 'active' : ''}`}>
+                  <div className="tab-description-title">{title}</div>
+                  {description && (
+                    <>
+                      <div className="tab-description-separator"></div>
+                      <div className="tab-description-text">{description}</div>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
         ))}
       </div>
       <div className="tabs-content">
@@ -65,8 +83,8 @@ function Tabs({ children, defaultTab = 0 }) {
   );
 }
 
-export function Tab({ children, id, label }) {
-  return <div className="tab-panel" data-tab-id={id} data-tab-label={label}>{children}</div>;
+export function Tab({ children, id, label, description }) {
+  return <div className="tab-panel" data-tab-id={id} data-tab-label={label} data-tab-description={description}>{children}</div>;
 }
 
 export default Tabs;
