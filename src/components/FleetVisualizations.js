@@ -283,7 +283,7 @@ function FleetVisualizations({
               Wait Time (ms)
             </div>
             <ResponsiveContainer width="100%" height={400}>
-              <ComposedChart data={optimizationChainData} margin={{ top: 10, right: 120, left: 60, bottom: 5 }}>
+              <ComposedChart data={optimizationChainData} margin={{ top: 10, right: 20, left: 60, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="workersPerServer" 
