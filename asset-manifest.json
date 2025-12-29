@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/erlang-c-fleet-optimization-demo/static/css/main.594adbd6.css",
+    "main.js": "/erlang-c-fleet-optimization-demo/static/js/main.138439e1.js",
+    "index.html": "/erlang-c-fleet-optimization-demo/index.html",
+    "main.594adbd6.css.map": "/erlang-c-fleet-optimization-demo/static/css/main.594adbd6.css.map",
+    "main.138439e1.js.map": "/erlang-c-fleet-optimization-demo/static/js/main.138439e1.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.594adbd6.css",
+    "static/js/main.138439e1.js"
+  ]
+}
