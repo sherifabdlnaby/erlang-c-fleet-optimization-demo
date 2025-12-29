@@ -6,6 +6,7 @@ import {
   erlangC
 } from '../utils/erlangC';
 import ConfigurationManager from './ConfigurationManager';
+import ExplanationPanel from './ExplanationPanel';
 import './FleetOptimizationTab.css';
 
 function FleetOptimizationTab() {
@@ -227,12 +228,13 @@ function FleetOptimizationTab() {
       </div>
 
       <div className="fleet-layout">
-        <div className="fleet-inputs-panel">
-          <h3>Simulation Parameters</h3>
-          
-          <div className="panel-tooltip">
-            💡 Tip: You can enter values outside the slider range by typing directly in the number field
-          </div>
+        <div className="fleet-left-column">
+          <div className="fleet-inputs-panel">
+            <h3>Simulation Parameters</h3>
+            
+            <div className="panel-tooltip">
+              💡 Tip: You can enter values outside the slider range by typing directly in the number field
+            </div>
 
           <div className="input-section">
             <h4 className="input-section-title">Traffic Parameters</h4>
@@ -585,6 +587,12 @@ function FleetOptimizationTab() {
               />
             </div>
           </div>
+          </div>
+
+          <ConfigurationManager
+            currentConfig={getCurrentConfig()}
+            onLoadConfig={handleLoadConfig}
+          />
         </div>
 
         <div className="fleet-results-panel">
@@ -706,10 +714,9 @@ function FleetOptimizationTab() {
         </div>
       </div>
 
-      <ConfigurationManager
-        currentConfig={getCurrentConfig()}
-        onLoadConfig={handleLoadConfig}
-      />
+      <div className="explanation-section">
+        <ExplanationPanel />
+      </div>
     </div>
   );
 }

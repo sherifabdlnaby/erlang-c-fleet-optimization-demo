@@ -23,8 +23,14 @@
   align-items: flex-start;
 }
 
-.fleet-inputs-panel {
+.fleet-left-column {
   flex: 0 0 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.fleet-inputs-panel {
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 8px;
@@ -403,13 +409,28 @@
   font-size: 0.9rem;
 }
 
+.explanation-section {
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+  width: 100%;
+}
+
+.explanation-section .explanation-panel {
+  width: 100%;
+  max-width: 100%;
+}
+
 @media (max-width: 1024px) {
   .fleet-layout {
     flex-direction: column;
   }
 
-  .fleet-inputs-panel {
+  .fleet-left-column {
     flex: 1;
+    width: 100%;
+  }
+
+  .fleet-inputs-panel {
     width: 100%;
   }
 

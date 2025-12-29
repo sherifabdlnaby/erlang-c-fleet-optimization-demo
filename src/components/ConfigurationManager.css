@@ -1,9 +1,12 @@
 .configuration-manager {
-  margin-top: 2rem;
+  margin-top: 0;
+  margin-bottom: 0;
   padding: 1.5rem;
-  background: #f8f9fa;
+  background: white;
   border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 100%;
 }
 
 .config-manager-header {

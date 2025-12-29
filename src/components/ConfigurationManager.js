@@ -43,7 +43,7 @@ function ConfigurationManager({
 
   const handleSave = () => {
     if (!configName.trim()) {
-      alert('Please enter a name for this configuration');
+      alert('Please enter a name for this parameter set');
       return;
     }
 
@@ -68,7 +68,7 @@ function ConfigurationManager({
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this configuration?')) {
+    if (window.confirm('Are you sure you want to delete this parameter set?')) {
       setSavedConfigs(prev => prev.filter(c => c.id !== id));
       setSelectedConfigs(prev => prev.filter(cid => cid !== id));
     }
@@ -86,7 +86,7 @@ function ConfigurationManager({
 
   const handleCompare = () => {
     if (selectedConfigs.length < 2) {
-      alert('Please select at least 2 configurations to compare');
+      alert('Please select at least 2 parameter sets to compare');
       return;
     }
     setShowComparison(true);
@@ -99,7 +99,7 @@ function ConfigurationManager({
   return (
     <div className="configuration-manager">
       <div className="config-manager-header">
-        <h3>Saved Configurations</h3>
+        <h3>Saved Parameters</h3>
         <button 
           className="compare-btn"
           onClick={handleCompare}
@@ -112,7 +112,7 @@ function ConfigurationManager({
       <div className="save-config-section">
         <input
           type="text"
-          placeholder="Enter configuration name..."
+          placeholder="Enter parameter name..."
           value={configName}
           onChange={(e) => setConfigName(e.target.value)}
           onKeyPress={(e) => {
@@ -127,14 +127,14 @@ function ConfigurationManager({
           className="save-btn"
           disabled={!configName.trim()}
         >
-          Save Current Configuration
+          Save Current Parameters
         </button>
       </div>
 
       {showComparison && (
         <div className="comparison-view">
           <div className="comparison-header">
-            <h4>Configuration Comparison</h4>
+            <h4>Parameters Comparison</h4>
             <button 
               className="close-btn"
               onClick={() => {
@@ -151,7 +151,7 @@ function ConfigurationManager({
 
       <div className="saved-configs-list">
         {savedConfigs.length === 0 ? (
-          <div className="no-configs">No saved configurations yet</div>
+          <div className="no-configs">No saved parameters yet</div>
         ) : (
           savedConfigs.map(config => (
             <ConfigItem
