@@ -14,8 +14,7 @@ import {
 import {
   generateDataPoints,
   calculateTrafficIntensity,
-  findMinWorkers,
-  averageWaitingTime
+  findMinWorkers
 } from '../utils/erlangC';
 import MultiServerVisualization from './MultiServerVisualization';
 import ServerOptimizer from './ServerOptimizer';

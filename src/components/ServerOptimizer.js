@@ -3,12 +3,9 @@ import {
   calculateTrafficIntensity,
   calculateUtilization,
   averageWaitingTime,
-  erlangC,
-  findMinWorkers
+  erlangC
 } from '../utils/erlangC';
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -54,9 +51,6 @@ function ServerOptimizer({ arrivalRate, serviceTime, maxWaitTimeMs }) {
         const totalCost = (costPerServer * numServers) + (costPerWorker * totalWorkers);
         const avgUtilization = utilization;
         
-        // Calculate variance (for load balancing quality)
-        const variance = 0; // Single server per config, variance is 0
-        
         configs.push({
           numServers,
           workersPerServer,
@@ -76,13 +70,11 @@ function ServerOptimizer({ arrivalRate, serviceTime, maxWaitTimeMs }) {
   }, [
     arrivalRate,
     serviceTime,
-    maxWaitTimeMs,
     maxServers,
     maxWorkersPerServer,
     costPerWorker,
     costPerServer,
-    maxWaitTimeSeconds,
-    trafficIntensity
+    maxWaitTimeSeconds
   ]);
 
   // Score configurations based on optimization goal
@@ -90,8 +82,6 @@ function ServerOptimizer({ arrivalRate, serviceTime, maxWaitTimeMs }) {
     if (configurations.length === 0) return [];
     
     const maxCost = Math.max(...configurations.map(c => c.totalCost));
-    const maxUtilization = Math.max(...configurations.map(c => c.avgUtilization));
-    const minWaitTime = Math.min(...configurations.map(c => c.waitTime));
     const maxEfficiency = Math.max(...configurations.map(c => c.efficiency));
     
     return configurations.map(config => {
@@ -135,32 +125,6 @@ function ServerOptimizer({ arrivalRate, serviceTime, maxWaitTimeMs }) {
       workersPerServer: config.workersPerServer,
       score: config.score
     }));
-  }, [scoredConfigurations]);
-
-  const serverWorkerMatrix = useMemo(() => {
-    const matrix = [];
-    const serverCounts = [...new Set(scoredConfigurations.map(c => c.numServers))].sort((a, b) => a - b);
-    const workerCounts = [...new Set(scoredConfigurations.map(c => c.workersPerServer))].sort((a, b) => a - b);
-    
-    serverCounts.forEach(numServers => {
-      workerCounts.forEach(workersPerServer => {
-        const config = scoredConfigurations.find(
-          c => c.numServers === numServers && c.workersPerServer === workersPerServer
-        );
-        if (config) {
-          matrix.push({
-            numServers,
-            workersPerServer,
-            utilization: config.avgUtilization,
-            cost: config.totalCost,
-            waitTime: config.waitTime,
-            score: config.score
-          });
-        }
-      });
-    });
-    
-    return matrix;
   }, [scoredConfigurations]);
 
   return (

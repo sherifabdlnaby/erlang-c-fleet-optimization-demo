@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import {
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -9,8 +8,7 @@ import {
   Legend,
   ResponsiveContainer,
   ComposedChart,
-  ReferenceLine,
-  Cell
+  ReferenceLine
 } from 'recharts';
 import {
   calculateTrafficIntensity,
@@ -140,113 +138,6 @@ function FleetVisualizations({
     return data;
   }, [isValid, totalArrivalRate, serviceTime, maxWaitTimeMs, maxProbabilityDelay, costPerWorker, perServerOverhead, totalTrafficIntensity, optMinWorkers, optMaxWorkers, workersPerServer]);
 
-  // 2. Create a heatmap-like data structure: Workers vs Utilization → Servers
-  const optimizationHeatmap = useMemo(() => {
-    if (!isValid) return [];
-    
-    const data = [];
-    // Worker range: use provided range or calculate based on current workersPerServer
-    const minWorkers = optMinWorkers !== null 
-      ? Math.max(1, optMinWorkers)
-      : Math.max(1, workersPerServer - 10);
-    const maxWorkers = optMaxWorkers !== null
-      ? Math.min(1000, Math.max(minWorkers, optMaxWorkers))
-      : Math.min(200, Math.max(workersPerServer + 20, Math.ceil(totalTrafficIntensity / 2)));
-    // Use step size to avoid too many iterations for high traffic, but ensure we include current
-    const range = maxWorkers - minWorkers;
-    const stepSize = range > 50 ? Math.max(1, Math.floor(range / 50)) : 1;
-    const workersToTest = new Set();
-    const utilizationLevels = [50, 60, 70, 75, 80, 85, 90, 95];
-    
-    // Always include current workersPerServer
-    workersToTest.add(workersPerServer);
-    
-    // Add sampled workers
-    for (let workers = minWorkers; workers <= maxWorkers; workers += stepSize) {
-      workersToTest.add(workers);
-    }
-    
-    // Add boundary values
-    workersToTest.add(minWorkers);
-    workersToTest.add(maxWorkers);
-    
-    const sortedWorkers = Array.from(workersToTest).sort((a, b) => a - b);
-    
-    for (const workers of sortedWorkers) {
-      for (const targetUtil of utilizationLevels) {
-        const requiredServers = Math.ceil((totalTrafficIntensity * 100) / (targetUtil * workers));
-        
-        if (requiredServers < 1 || requiredServers > 10000) continue;
-        
-        const arrivalRatePerServer = totalArrivalRate / requiredServers;
-        const trafficIntensityPerServer = calculateTrafficIntensity(arrivalRatePerServer, serviceTime);
-        
-        if (trafficIntensityPerServer >= workers) continue;
-        
-        try {
-          const actualUtilization = calculateUtilization(workers, trafficIntensityPerServer);
-          const waitTime = averageWaitingTime(workers, trafficIntensityPerServer, serviceTime) * 1000;
-          const probabilityDelay = erlangC(workers, trafficIntensityPerServer) * 100;
-          
-          if (!isFinite(waitTime) || !isFinite(probabilityDelay) || !isFinite(actualUtilization)) {
-            continue;
-          }
-          
-          const meetsSLA = waitTime <= maxWaitTimeMs && probabilityDelay <= maxProbabilityDelay;
-          
-          data.push({
-            workersPerServer: workers,
-            targetUtilization: targetUtil,
-            requiredServers,
-            actualUtilization,
-            waitTime,
-            probabilityDelay,
-            meetsSLA,
-            totalCost: (costPerWorker * requiredServers * workers) + (perServerOverhead * requiredServers)
-          });
-        } catch (e) {
-          continue;
-        }
-      }
-    }
-    
-    return data;
-  }, [isValid, totalArrivalRate, serviceTime, maxWaitTimeMs, maxProbabilityDelay, costPerWorker, perServerOverhead, totalTrafficIntensity, optMinWorkers, optMaxWorkers, workersPerServer]);
-
-  // 3. Find optimal configurations (Pareto frontier: minimize servers, maximize utilization)
-  const optimalConfigurations = useMemo(() => {
-    if (!optimizationChainData || optimizationChainData.length === 0) return [];
-    
-    // True Pareto frontier: configurations where you can't reduce servers without reducing utilization
-    // Sort by servers (ascending)
-    const sorted = [...optimizationChainData].sort((a, b) => {
-      return a.minServersRequired - b.minServersRequired;
-    });
-    
-    // Find Pareto optimal points: for each server count, keep the one with highest utilization
-    const pareto = [];
-    let lastServers = -1;
-    let bestUtilization = -1;
-    
-    for (const config of sorted) {
-      // If same server count, keep the one with higher utilization
-      if (config.minServersRequired === lastServers) {
-        if (config.maxFeasibleUtilization > bestUtilization) {
-          pareto[pareto.length - 1] = config;
-          bestUtilization = config.maxFeasibleUtilization;
-        }
-      } else {
-        // New server count - add it if utilization is better than previous
-        if (config.maxFeasibleUtilization >= bestUtilization) {
-          pareto.push(config);
-          lastServers = config.minServersRequired;
-          bestUtilization = config.maxFeasibleUtilization;
-        }
-      }
-    }
-    
-    return pareto;
-  }, [optimizationChainData]);
 
   // Current configuration analysis
   const currentAnalysis = useMemo(() => {
