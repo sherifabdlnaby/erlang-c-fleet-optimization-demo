@@ -50,10 +50,17 @@ function Tabs({ children, defaultTab = 0 }) {
     <div className="tabs-container">
       <div className="tabs-header">
         {tabs.map((tab, index) => (
-          <div key={index} className="tab-header-item">
+          <div 
+            key={index} 
+            className={`tab-header-item ${activeTab === index ? 'active' : ''}`}
+            onClick={() => handleTabChange(index)}
+          >
             <button
               className={`tab-button ${activeTab === index ? 'active' : ''}`}
-              onClick={() => handleTabChange(index)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleTabChange(index);
+              }}
             >
               {tab.label}
             </button>
