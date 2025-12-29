@@ -248,7 +248,7 @@ function FleetVisualizations({
           <p>Unable to generate visualizations with current parameters.</p>
           <p className="error-hint">
             {currentAnalysis && !currentAnalysis.meetsSLA 
-              ? `Current configuration does not meet SLA requirements (Wait: ${currentAnalysis.waitTime.toFixed(0)}ms, Prob: ${currentAnalysis.probabilityDelay.toFixed(1)}%)`
+              ? `Current configuration does not meet SLA requirements (Wait: ${currentAnalysis.waitTime.toFixed(2)}ms, Prob: ${currentAnalysis.probabilityDelay.toFixed(2)}%)`
               : 'Please adjust parameters to find valid configurations that meet SLA requirements.'}
           </p>
         </div>
@@ -278,27 +278,60 @@ function FleetVisualizations({
             while still meeting SLA requirements. Higher utilization means we need fewer servers total. 
             <strong> All configurations shown here are optimal and meet SLA constraints.</strong>
           </p>
-          <ResponsiveContainer width="100%" height={400}>
-            <ComposedChart data={optimizationChainData} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="workersPerServer" 
-                label={{ value: 'Workers per Server', position: 'insideBottom', offset: -5 }}
-              />
-              <YAxis 
-                yAxisId="left"
-                label={{ value: 'Wait Time (ms)', angle: -90, position: 'insideLeft' }}
-              />
-              <YAxis 
-                yAxisId="right" 
-                orientation="right"
-                label={{ value: 'Utilization (%) / Servers', angle: 90, position: 'insideRight' }}
-              />
+          <div style={{ position: 'relative', width: '100%', height: '400px' }}>
+            <div style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', transformOrigin: 'center', fontSize: '14px', fontWeight: '500', color: '#666', zIndex: 1 }}>
+              Wait Time (ms)
+            </div>
+            <ResponsiveContainer width="100%" height={400}>
+              <ComposedChart data={optimizationChainData} margin={{ top: 10, right: 120, left: 60, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="workersPerServer" 
+                  label={{ value: 'Workers per Server', position: 'insideBottom', offset: -5 }}
+                />
+                <YAxis 
+                  yAxisId="left"
+                  tickFormatter={(value) => {
+                    const num = Number(value);
+                    return num % 1 === 0 ? num.toString() : num.toFixed(2);
+                  }}
+                  width={60}
+                />
+                <YAxis 
+                  yAxisId="utilization" 
+                  orientation="right"
+                  domain={[0, 100]}
+                  tickFormatter={(value) => {
+                    const num = Number(value);
+                    const formatted = num % 1 === 0 ? num.toString() : num.toFixed(2);
+                    return `${formatted}%`;
+                  }}
+                  width={50}
+                />
+                <YAxis 
+                  yAxisId="servers" 
+                  orientation="right"
+                  domain={['dataMin', 'dataMax']}
+                  tickFormatter={(value) => {
+                    const num = Number(value);
+                    return num % 1 === 0 ? num.toString() : num.toFixed(2);
+                  }}
+                  width={50}
+                />
               <Tooltip 
                 formatter={(value, name) => {
-                  if (name === 'waitTimeAtOptimal') return `${value.toFixed(0)} ms`;
-                  if (name === 'maxFeasibleUtilization') return `${value.toFixed(1)}%`;
-                  if (name === 'minServersRequired') return `${value} servers`;
+                  if (name === 'waitTimeAtOptimal') {
+                    return `${value} ms`;
+                  }
+                  if (name === 'maxFeasibleUtilization') {
+                    return `${value}%`;
+                  }
+                  if (name === 'minServersRequired') {
+                    return `${value} servers`;
+                  }
+                  if (typeof value === 'number') {
+                    return value.toString();
+                  }
                   return value;
                 }}
                 labelFormatter={(label) => `${label} workers/server`}
@@ -321,7 +354,7 @@ function FleetVisualizations({
                 dot={{ r: 3 }}
               />
               <Line 
-                yAxisId="right"
+                yAxisId="utilization"
                 type="monotone" 
                 dataKey="maxFeasibleUtilization" 
                 stroke="#8884d8" 
@@ -330,13 +363,12 @@ function FleetVisualizations({
                 dot={{ r: 4 }}
               />
               <Line 
-                yAxisId="right"
+                yAxisId="servers"
                 type="monotone" 
                 dataKey="minServersRequired" 
                 stroke="#82ca9d" 
                 strokeWidth={3}
                 name="Min Servers Required"
-                strokeDasharray="5 5"
                 dot={{ r: 4 }}
               />
               {currentAnalysis && currentAnalysis.meetsSLA && (
@@ -349,8 +381,9 @@ function FleetVisualizations({
                   label="Current"
                 />
               )}
-            </ComposedChart>
-          </ResponsiveContainer>
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
         </div>
         )}
 
