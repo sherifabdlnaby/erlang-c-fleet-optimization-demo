@@ -13,6 +13,7 @@ function FleetOptimizationTab() {
   const [numServers, setNumServers] = useState(3);
   const [workersPerServer, setWorkersPerServer] = useState(5);
   const [maxWaitTimeMs, setMaxWaitTimeMs] = useState(200);
+  const [maxProbabilityDelay, setMaxProbabilityDelay] = useState(10); // percentage
   const [perServerOverhead, setPerServerOverhead] = useState(0);
   const [costPerWorker, setCostPerWorker] = useState(10);
 
@@ -27,6 +28,8 @@ function FleetOptimizationTab() {
   const [maxWorkers, setMaxWorkers] = useState(50);
   const [minWaitTime, setMinWaitTime] = useState(50);
   const [maxWaitTime, setMaxWaitTime] = useState(1000);
+  const [minProbabilityDelay, setMinProbabilityDelay] = useState(0);
+  const [maxProbabilityDelaySlider, setMaxProbabilityDelaySlider] = useState(100);
 
   // Convert service time from ms to seconds for calculations
   const serviceTime = serviceTimeMs / 1000;
@@ -63,7 +66,9 @@ function FleetOptimizationTab() {
     const probabilityDelay = erlangC(workersPerServer, trafficIntensityPerServer);
 
     // Check if meets SLA
-    const meetsSLA = waitTime * 1000 <= maxWaitTimeMs;
+    const meetsWaitTimeSLA = waitTime * 1000 <= maxWaitTimeMs;
+    const meetsProbabilitySLA = probabilityDelay * 100 <= maxProbabilityDelay;
+    const meetsSLA = meetsWaitTimeSLA && meetsProbabilitySLA;
 
     return {
       isStable: true,
@@ -72,9 +77,11 @@ function FleetOptimizationTab() {
       utilization,
       waitTime: waitTime * 1000, // Convert to milliseconds
       probabilityDelay: probabilityDelay * 100, // Convert to percentage
-      meetsSLA
+      meetsSLA,
+      meetsWaitTimeSLA,
+      meetsProbabilitySLA
     };
-  }, [totalArrivalRate, serviceTime, numServers, workersPerServer, maxWaitTimeMs]);
+  }, [totalArrivalRate, serviceTime, numServers, workersPerServer, maxWaitTimeMs, maxProbabilityDelay]);
 
   // Calculate total cost (workers + server overhead)
   const totalCost = useMemo(() => {
@@ -101,11 +108,13 @@ function FleetOptimizationTab() {
             💡 Tip: You can enter values outside the slider range by typing directly in the number field
           </div>
 
-          <div className="input-group">
-            <label>
-              <span className="label-text">Total Arrival Rate</span>
-              <span className="label-unit">(req/sec)</span>
-            </label>
+          <div className="input-section">
+            <h4 className="input-section-title">Traffic Parameters</h4>
+            <div className="input-group">
+              <label>
+                <span className="label-text">Total Arrival Rate</span>
+                <span className="label-unit">(req/sec)</span>
+              </label>
             <div className="slider-input-container">
               <input
                 type="range"
@@ -174,13 +183,15 @@ function FleetOptimizationTab() {
                 className="number-input"
               />
             </div>
-            <div className="value-display-small">{serviceTimeMs} ms</div>
+          </div>
           </div>
 
-          <div className="input-group">
-            <label>
-              <span className="label-text">Number of Servers</span>
-            </label>
+          <div className="input-section">
+            <h4 className="input-section-title">Server Configuration</h4>
+            <div className="input-group">
+              <label>
+                <span className="label-text">Number of Servers</span>
+              </label>
             <div className="slider-input-container">
               <input
                 type="range"
@@ -250,26 +261,29 @@ function FleetOptimizationTab() {
               />
             </div>
           </div>
+          </div>
 
-          <div className="input-group">
-            <label>
-              <span className="label-text">Max Wait Time Tolerance</span>
-              <span className="label-unit">(ms)</span>
-            </label>
-            <div className="slider-input-container">
-              <input
-                type="range"
-                min={minWaitTime}
-                max={maxWaitTime}
-                step="50"
-                value={maxWaitTimeMs}
-                onChange={(e) => setMaxWaitTimeMs(Number(e.target.value))}
-                className="slider-input"
-              />
-              <input
-                type="number"
-                step="1"
-                value={maxWaitTimeMs}
+          <div className="input-section">
+            <h4 className="input-section-title">SLA Metric</h4>
+            <div className="input-group">
+              <label>
+                <span className="label-text">Max Wait Time Tolerance</span>
+                <span className="label-unit">(ms)</span>
+              </label>
+              <div className="slider-input-container">
+                <input
+                  type="range"
+                  min={minWaitTime}
+                  max={maxWaitTime}
+                  step="50"
+                  value={maxWaitTimeMs}
+                  onChange={(e) => setMaxWaitTimeMs(Number(e.target.value))}
+                  className="slider-input"
+                />
+                <input
+                  type="number"
+                  step="1"
+                  value={maxWaitTimeMs}
                   onChange={(e) => {
                     const val = Number(e.target.value);
                     if (!isNaN(val) && val > 0) {
@@ -283,8 +297,46 @@ function FleetOptimizationTab() {
                       setMaxWaitTimeMs(0);
                     }
                   }}
-                className="number-input"
-              />
+                  className="number-input"
+                />
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label>
+                <span className="label-text">Max Probability of Queueing</span>
+                <span className="label-unit">(%)</span>
+              </label>
+              <div className="slider-input-container">
+                <input
+                  type="range"
+                  min={minProbabilityDelay}
+                  max={maxProbabilityDelaySlider}
+                  step="1"
+                  value={maxProbabilityDelay}
+                  onChange={(e) => setMaxProbabilityDelay(Number(e.target.value))}
+                  className="slider-input"
+                />
+                <input
+                  type="number"
+                  step="0.1"
+                  value={maxProbabilityDelay}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (!isNaN(val) && val >= 0) {
+                      setMaxProbabilityDelay(val);
+                      if (val < minProbabilityDelay || val > maxProbabilityDelaySlider) {
+                        const { newMin, newMax } = calculateNewRange(val);
+                        setMinProbabilityDelay(Math.max(0, Math.floor(newMin)));
+                        setMaxProbabilityDelaySlider(Math.min(100, Math.ceil(newMax))); // Cap at 100%
+                      }
+                    } else if (e.target.value === '' || e.target.value === '-') {
+                      setMaxProbabilityDelay(0);
+                    }
+                  }}
+                  className="number-input"
+                />
+              </div>
             </div>
           </div>
 
@@ -359,11 +411,11 @@ function FleetOptimizationTab() {
 
                 <div className="result-card">
                   <div className="result-label">Average Wait Time per Server</div>
-                  <div className={`result-value ${serverMetrics.meetsSLA ? 'success' : 'warning'}`}>
+                  <div className={`result-value ${serverMetrics.meetsWaitTimeSLA ? 'success' : 'warning'}`}>
                     {serverMetrics.waitTime.toFixed(2)} ms
                   </div>
                   <div className="result-status">
-                    {serverMetrics.meetsSLA ? (
+                    {serverMetrics.meetsWaitTimeSLA ? (
                       <span className="status-success">✓ Meets SLA ({maxWaitTimeMs}ms)</span>
                     ) : (
                       <span className="status-warning">⚠ Exceeds SLA ({maxWaitTimeMs}ms)</span>
@@ -389,14 +441,14 @@ function FleetOptimizationTab() {
 
                 <div className="result-card">
                   <div className="result-label">Probability of Queueing per Server</div>
-                  <div className={`result-value ${serverMetrics.probabilityDelay > 10 ? 'warning' : 'success'}`}>
+                  <div className={`result-value ${serverMetrics.meetsProbabilitySLA ? 'success' : 'warning'}`}>
                     {serverMetrics.probabilityDelay.toFixed(2)}%
                   </div>
                   <div className="result-status">
-                    {serverMetrics.probabilityDelay > 10 ? (
-                      <span className="status-warning">High queue probability</span>
+                    {serverMetrics.meetsProbabilitySLA ? (
+                      <span className="status-success">✓ Meets SLA ({maxProbabilityDelay}%)</span>
                     ) : (
-                      <span className="status-success">Low queue probability</span>
+                      <span className="status-warning">⚠ Exceeds SLA ({maxProbabilityDelay}%)</span>
                     )}
                   </div>
                 </div>

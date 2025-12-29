@@ -49,8 +49,26 @@
   line-height: 1.5;
 }
 
+.input-section {
+  margin-bottom: 0;
+  padding-bottom: 15px;
+}
+
+.input-section-title {
+  color: #667eea;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
 .input-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.input-section .input-group:last-child {
+  margin-bottom: 0;
 }
 
 .input-group label {
