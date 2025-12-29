@@ -1,0 +1,142 @@
+.explanation-panel {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  height: 100%;
+}
+
+.explanation-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.3s;
+}
+
+.explanation-header:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #653a8f 100%);
+}
+
+.explanation-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.toggle-icon {
+  font-size: 2rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.explanation-content {
+  padding: 2rem;
+  color: #333;
+  line-height: 1.6;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.explanation-content section {
+  margin-bottom: 2rem;
+}
+
+.explanation-content section:last-child {
+  margin-bottom: 0;
+}
+
+.explanation-content h3 {
+  color: #667eea;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.explanation-content p {
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+.explanation-content ul,
+.explanation-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+.explanation-content li {
+  margin-bottom: 0.5rem;
+}
+
+.explanation-content strong {
+  color: #333;
+}
+
+.formula-box {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.formula-item {
+  margin-bottom: 1.5rem;
+}
+
+.formula-item:last-child {
+  margin-bottom: 0;
+}
+
+.formula-item code {
+  display: block;
+  background: white;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #e83e8c;
+  overflow-x: auto;
+}
+
+.formula-item p {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+.references {
+  list-style: none;
+  margin-left: 0;
+}
+
+.references li {
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid #667eea;
+}
+
+.references a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.references a:hover {
+  text-decoration: underline;
+}
+
+.references ul {
+  margin-top: 0.5rem;
+  margin-left: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .explanation-panel {
+    max-width: 100%;
+  }
+}

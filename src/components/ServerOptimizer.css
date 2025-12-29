@@ -1,0 +1,315 @@
+.server-optimizer-container {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+.optimizer-header {
+  margin-bottom: 2rem;
+}
+
+.optimizer-header h3 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.optimizer-subtitle {
+  color: #666;
+  font-size: 1rem;
+}
+
+.optimization-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.control-section h4 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.goal-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.goal-buttons button {
+  padding: 0.75rem 1rem;
+  border: 2px solid #ddd;
+  background: white;
+  color: #333;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.goal-buttons button:hover {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.goal-buttons button.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+}
+
+.cost-inputs,
+.constraint-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cost-input,
+.constraint-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cost-input label,
+.constraint-input label {
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.cost-input input,
+.constraint-input input,
+.number-input-full {
+  padding: 0.5rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.cost-input input:focus,
+.constraint-input input:focus,
+.number-input-full:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.number-input-full::-webkit-outer-spin-button,
+.number-input-full::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.number-input-full[type=number] {
+  -moz-appearance: textfield;
+}
+
+.optimal-configuration {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  color: white;
+}
+
+.optimal-configuration h4 {
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.optimal-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.optimal-metric {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.optimal-label {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+}
+
+.optimal-value {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.optimization-visualizations {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.chart-container {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.chart-container h4 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.configurations-table {
+  overflow-x: auto;
+}
+
+.configurations-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.configurations-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.configurations-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.configurations-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  color: #333;
+}
+
+.configurations-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.configurations-table tbody tr.optimal-row {
+  background: #e8f5e9;
+  font-weight: bold;
+}
+
+.configurations-table tbody tr.optimal-row td {
+  color: #2e7d32;
+}
+
+.custom-tooltip {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #ddd;
+}
+
+.custom-tooltip p {
+  margin: 0.25rem 0;
+  color: #333;
+}
+
+.custom-tooltip p strong {
+  color: #667eea;
+}
+
+.optimization-guide {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.optimization-guide h4 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.guide-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.guide-section {
+  background: white;
+  padding: 1rem;
+  border-radius: 6px;
+}
+
+.guide-section h5 {
+  color: #667eea;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.guide-section p {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.guide-section code {
+  background: #f0f0f0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  color: #e83e8c;
+  font-size: 0.9rem;
+}
+
+.guide-section ul {
+  margin-left: 1.5rem;
+  color: #555;
+  line-height: 1.8;
+}
+
+.guide-section li {
+  margin-bottom: 0.5rem;
+}
+
+.guide-section li strong {
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .optimization-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .goal-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .optimal-details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .configurations-table {
+    font-size: 0.85rem;
+  }
+
+  .configurations-table th,
+  .configurations-table td {
+    padding: 0.5rem;
+  }
+}
