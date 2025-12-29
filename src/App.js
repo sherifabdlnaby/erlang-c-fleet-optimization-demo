@@ -14,7 +14,7 @@ function App() {
           </div>
           <div className="author-links">
             <a 
-              href="https://sherifabdlnaby.com" 
+              href="https://sherif.dev" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="author-link"
