@@ -1,5 +1,7 @@
 # Erlang C Formula - Web Server Capacity Planner
 
+🌐 **Live Demo**: [https://sherifabdlnaby.github.io/erlang-c-fleet-optimization-demo](https://sherifabdlnaby.github.io/erlang-c-fleet-optimization-demo)
+
 A React application that visualizes the Erlang C formula applied to web server capacity planning. This tool helps you optimize the number of workers/threads needed to handle incoming requests while meeting your SLA requirements.
 
 > ⚠️ **Disclaimer**: This project was entirely vibe coded, but human validated and tested. Don't look too much into the code - it's functional! See [DISCLAIMER.md](./DISCLAIMER.md) for details.
