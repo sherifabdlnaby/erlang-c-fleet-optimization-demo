@@ -35,7 +35,7 @@ function FleetOptimizationTab() {
   const [useTargetUtilization, setUseTargetUtilization] = useState(() => getQueryParamBool('autoUtil', false));
   const [maxWaitTimeMs, setMaxWaitTimeMs] = useState(() => getQueryParam('maxWait', 200));
   const [maxProbabilityDelay, setMaxProbabilityDelay] = useState(() => getQueryParam('maxProb', 10)); // percentage
-  const [perServerOverhead, setPerServerOverhead] = useState(() => getQueryParam('overhead', 0));
+  const [perServerOverhead, setPerServerOverhead] = useState(() => getQueryParam('overhead', 10));
   const [costPerWorker, setCostPerWorker] = useState(() => getQueryParam('costWorker', 10));
 
   // Dynamic min/max values for sliders (can be overridden by direct input)
