@@ -27,7 +27,7 @@ function App() {
         <p>
           <small>
             ⚠️ Vibe coded, human validated & tested. 
-            <a href="https://github.com/YOUR_USERNAME/erlang-c/blob/main/DISCLAIMER.md" target="_blank" rel="noopener noreferrer" style={{ marginLeft: '0.5rem', color: 'inherit', textDecoration: 'underline' }}>
+            <a href="https://github.com/sherifabdlnaby/erlang-c-fleet-optimization-demo/blob/main/DISCLAIMER.md" target="_blank" rel="noopener noreferrer" style={{ marginLeft: '0.5rem', color: 'inherit', textDecoration: 'underline' }}>
               See disclaimer
             </a>
           </small>
