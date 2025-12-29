@@ -30,6 +30,13 @@
   gap: 2rem;
 }
 
+.fleet-right-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
 .fleet-inputs-panel {
   background: #f8f9fa;
   padding: 1.5rem;
@@ -67,6 +74,14 @@
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid #e0e0e0;
+}
+
+.section-description {
+  color: #666;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  font-style: italic;
 }
 
 .input-group {

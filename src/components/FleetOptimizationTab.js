@@ -7,6 +7,7 @@ import {
 } from '../utils/erlangC';
 import ConfigurationManager from './ConfigurationManager';
 import ExplanationPanel from './ExplanationPanel';
+import FleetVisualizations from './FleetVisualizations';
 import './FleetOptimizationTab.css';
 
 function FleetOptimizationTab() {
@@ -52,6 +53,12 @@ function FleetOptimizationTab() {
   const [maxProbabilityDelaySlider, setMaxProbabilityDelaySlider] = useState(100);
   const [minTargetUtilization, setMinTargetUtilization] = useState(10);
   const [maxTargetUtilization, setMaxTargetUtilization] = useState(95);
+  
+  // Optimization analysis range
+  const [optMinWorkers, setOptMinWorkers] = useState(() => getQueryParam('optMinWorkers', null));
+  const [optMaxWorkers, setOptMaxWorkers] = useState(() => getQueryParam('optMaxWorkers', null));
+  const [minOptWorkers, setMinOptWorkers] = useState(1);
+  const [maxOptWorkers, setMaxOptWorkers] = useState(100);
 
   // Convert service time from ms to seconds for calculations
   const serviceTime = serviceTimeMs / 1000;
@@ -174,7 +181,7 @@ function FleetOptimizationTab() {
 
   // Update URL when parameters change
   useEffect(() => {
-    updateQueryParams({
+    const params = {
       arrivalRate: totalArrivalRate,
       serviceTime: serviceTimeMs,
       servers: numServers,
@@ -185,8 +192,13 @@ function FleetOptimizationTab() {
       maxProb: maxProbabilityDelay,
       overhead: perServerOverhead,
       costWorker: costPerWorker
-    });
-  }, [totalArrivalRate, serviceTimeMs, numServers, workersPerServer, targetUtilization, useTargetUtilization, maxWaitTimeMs, maxProbabilityDelay, perServerOverhead, costPerWorker]);
+    };
+    
+    if (optMinWorkers !== null) params.optMinWorkers = optMinWorkers;
+    if (optMaxWorkers !== null) params.optMaxWorkers = optMaxWorkers;
+    
+    updateQueryParams(params);
+  }, [totalArrivalRate, serviceTimeMs, numServers, workersPerServer, targetUtilization, useTargetUtilization, maxWaitTimeMs, maxProbabilityDelay, perServerOverhead, costPerWorker, optMinWorkers, optMaxWorkers]);
 
   // Get current configuration for saving
   const getCurrentConfig = () => {
@@ -200,7 +212,9 @@ function FleetOptimizationTab() {
       maxWaitTimeMs,
       maxProbabilityDelay,
       perServerOverhead,
-      costPerWorker
+      costPerWorker,
+      optMinWorkers,
+      optMaxWorkers
     };
   };
 
@@ -216,6 +230,8 @@ function FleetOptimizationTab() {
     setMaxProbabilityDelay(config.maxProbabilityDelay);
     setPerServerOverhead(config.perServerOverhead);
     setCostPerWorker(config.costPerWorker);
+    if (config.optMinWorkers !== undefined) setOptMinWorkers(config.optMinWorkers);
+    if (config.optMaxWorkers !== undefined) setOptMaxWorkers(config.optMaxWorkers);
   };
 
   return (
@@ -587,6 +603,114 @@ function FleetOptimizationTab() {
               />
             </div>
           </div>
+
+          <div className="input-section">
+            <h4 className="input-section-title">Optimization Analysis Range</h4>
+            <p className="section-description">
+              Set the range of workers per server to explore in the optimization analysis.
+              Leave empty to auto-calculate based on current configuration.
+            </p>
+            
+            <div className="input-group">
+              <label>
+                <span className="label-text">Min Workers to Analyze</span>
+                <span className="label-unit">(optional)</span>
+              </label>
+              <div className="slider-input-container">
+                <input
+                  type="range"
+                  min={minOptWorkers}
+                  max={maxOptWorkers}
+                  step="1"
+                  value={optMinWorkers || Math.max(1, workersPerServer - 10)}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (val > 0) {
+                      setOptMinWorkers(val);
+                      if (val < minOptWorkers || val > maxOptWorkers) {
+                        const { newMin, newMax } = calculateNewRange(val);
+                        setMinOptWorkers(Math.max(1, Math.floor(newMin)));
+                        setMaxOptWorkers(Math.ceil(newMax));
+                      }
+                    }
+                  }}
+                  className="slider-input"
+                />
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={optMinWorkers || ''}
+                  onChange={(e) => {
+                    const val = e.target.value === '' ? null : Number(e.target.value);
+                    if (val === null) {
+                      setOptMinWorkers(null);
+                    } else if (!isNaN(val) && val > 0) {
+                      const intVal = Math.floor(val);
+                      setOptMinWorkers(intVal);
+                      if (intVal < minOptWorkers || intVal > maxOptWorkers) {
+                        const { newMin, newMax } = calculateNewRange(intVal);
+                        setMinOptWorkers(Math.max(1, Math.floor(newMin)));
+                        setMaxOptWorkers(Math.ceil(newMax));
+                      }
+                    }
+                  }}
+                  className="number-input"
+                  placeholder="Auto"
+                />
+              </div>
+            </div>
+            
+            <div className="input-group">
+              <label>
+                <span className="label-text">Max Workers to Analyze</span>
+                <span className="label-unit">(optional)</span>
+              </label>
+              <div className="slider-input-container">
+                <input
+                  type="range"
+                  min={minOptWorkers}
+                  max={maxOptWorkers}
+                  step="1"
+                  value={optMaxWorkers || Math.min(100, workersPerServer + 20)}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (val > 0) {
+                      setOptMaxWorkers(val);
+                      if (val < minOptWorkers || val > maxOptWorkers) {
+                        const { newMin, newMax } = calculateNewRange(val);
+                        setMinOptWorkers(Math.max(1, Math.floor(newMin)));
+                        setMaxOptWorkers(Math.ceil(newMax));
+                      }
+                    }
+                  }}
+                  className="slider-input"
+                />
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={optMaxWorkers || ''}
+                  onChange={(e) => {
+                    const val = e.target.value === '' ? null : Number(e.target.value);
+                    if (val === null) {
+                      setOptMaxWorkers(null);
+                    } else if (!isNaN(val) && val > 0) {
+                      const intVal = Math.floor(val);
+                      setOptMaxWorkers(intVal);
+                      if (intVal < minOptWorkers || intVal > maxOptWorkers) {
+                        const { newMin, newMax } = calculateNewRange(intVal);
+                        setMinOptWorkers(Math.max(1, Math.floor(newMin)));
+                        setMaxOptWorkers(Math.ceil(newMax));
+                      }
+                    }
+                  }}
+                  className="number-input"
+                  placeholder="Auto"
+                />
+              </div>
+            </div>
+          </div>
           </div>
 
           <ConfigurationManager
@@ -595,122 +719,138 @@ function FleetOptimizationTab() {
           />
         </div>
 
-        <div className="fleet-results-panel">
-          <h3>Simulation Results</h3>
+        <div className="fleet-right-column">
+          <div className="fleet-results-panel">
+            <h3>Simulation Results</h3>
 
-          {serverMetrics && serverMetrics.isStable ? (
-            <>
-              <div className="results-grid">
-                <div className="result-card">
-                  <div className="result-label">Total Cost</div>
-                  <div className="result-value cost-value">
-                    ${totalCost.toFixed(2)}
+            {serverMetrics && serverMetrics.isStable ? (
+              <>
+                <div className="results-grid">
+                  <div className="result-card">
+                    <div className="result-label">Total Cost</div>
+                    <div className="result-value cost-value">
+                      ${totalCost.toFixed(2)}
+                    </div>
+                    <div className="result-breakdown">
+                      {numServers * workersPerServer} workers × ${costPerWorker} = ${(costPerWorker * numServers * workersPerServer).toFixed(2)}
+                      {perServerOverhead > 0 && (
+                        <>
+                          <br />
+                          {numServers} servers × ${perServerOverhead} overhead = ${(perServerOverhead * numServers).toFixed(2)}
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="result-breakdown">
-                    {numServers * workersPerServer} workers × ${costPerWorker} = ${(costPerWorker * numServers * workersPerServer).toFixed(2)}
-                    {perServerOverhead > 0 && (
-                      <>
-                        <br />
-                        {numServers} servers × ${perServerOverhead} overhead = ${(perServerOverhead * numServers).toFixed(2)}
-                      </>
-                    )}
+
+                  <div className="result-card">
+                    <div className="result-label">Average Wait Time per Server</div>
+                    <div className={`result-value ${serverMetrics.meetsWaitTimeSLA ? 'success' : 'warning'}`}>
+                      {serverMetrics.waitTime.toFixed(2)} ms
+                    </div>
+                    <div className="result-status">
+                      {serverMetrics.meetsWaitTimeSLA ? (
+                        <span className="status-success">✓ Meets SLA ({maxWaitTimeMs}ms)</span>
+                      ) : (
+                        <span className="status-warning">⚠ Exceeds SLA ({maxWaitTimeMs}ms)</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="result-card">
+                    <div className="result-label">Server Utilization</div>
+                    <div className={`result-value ${serverMetrics.utilization > 85 ? 'warning' : serverMetrics.utilization < 50 ? 'low' : 'success'}`}>
+                      {serverMetrics.utilization.toFixed(2)}%
+                    </div>
+                    <div className="result-status">
+                      {serverMetrics.utilization > 85 ? (
+                        <span className="status-warning">High - Risk of overload</span>
+                      ) : serverMetrics.utilization < 50 ? (
+                        <span className="status-info">Low - Underutilized</span>
+                      ) : (
+                        <span className="status-success">Optimal range (70-85%)</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="result-card">
+                    <div className="result-label">Probability of Queueing per Server</div>
+                    <div className={`result-value ${serverMetrics.meetsProbabilitySLA ? 'success' : 'warning'}`}>
+                      {serverMetrics.probabilityDelay.toFixed(2)}%
+                    </div>
+                    <div className="result-status">
+                      {serverMetrics.meetsProbabilitySLA ? (
+                        <span className="status-success">✓ Meets SLA ({maxProbabilityDelay}%)</span>
+                      ) : (
+                        <span className="status-warning">⚠ Exceeds SLA ({maxProbabilityDelay}%)</span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <div className="result-card">
-                  <div className="result-label">Average Wait Time per Server</div>
-                  <div className={`result-value ${serverMetrics.meetsWaitTimeSLA ? 'success' : 'warning'}`}>
-                    {serverMetrics.waitTime.toFixed(2)} ms
+                <div className="detailed-metrics">
+                  <h4>Detailed Metrics</h4>
+                  <div className="metrics-table">
+                    <div className="metric-row">
+                      <span className="metric-name">Arrival Rate per Server:</span>
+                      <span className="metric-value">{serverMetrics.arrivalRatePerServer.toFixed(2)} req/sec</span>
+                    </div>
+                    <div className="metric-row">
+                      <span className="metric-name">Traffic Intensity per Server:</span>
+                      <span className="metric-value">{serverMetrics.trafficIntensityPerServer.toFixed(2)} Erlangs</span>
+                    </div>
+                    <div className="metric-row">
+                      <span className="metric-name">Total Workers:</span>
+                      <span className="metric-value">{numServers * workersPerServer}</span>
+                    </div>
+                    <div className="metric-row">
+                      <span className="metric-name">System Stability:</span>
+                      <span className="metric-value stability-stable">✓ Stable (A &lt; N)</span>
+                    </div>
                   </div>
-                  <div className="result-status">
-                    {serverMetrics.meetsWaitTimeSLA ? (
-                      <span className="status-success">✓ Meets SLA ({maxWaitTimeMs}ms)</span>
-                    ) : (
-                      <span className="status-warning">⚠ Exceeds SLA ({maxWaitTimeMs}ms)</span>
-                    )}
+
+                  <h4 className="cost-details-header">Cost Breakdown</h4>
+                  <div className="metrics-table">
+                    <div className="metric-row">
+                      <span className="metric-name">Total Cost per Worker:</span>
+                      <span className="metric-value">${(costPerWorker * numServers * workersPerServer).toFixed(2)}</span>
+                    </div>
+                    <div className="metric-row">
+                      <span className="metric-name">Total Cost of Per Server Overhead:</span>
+                      <span className="metric-value">${(perServerOverhead * numServers).toFixed(2)}</span>
+                    </div>
+                    <div className="metric-row">
+                      <span className="metric-name">Total Cost per Server:</span>
+                      <span className="metric-value">${((costPerWorker * workersPerServer) + perServerOverhead).toFixed(2)}</span>
+                    </div>
                   </div>
                 </div>
-
-                <div className="result-card">
-                  <div className="result-label">Server Utilization</div>
-                  <div className={`result-value ${serverMetrics.utilization > 85 ? 'warning' : serverMetrics.utilization < 50 ? 'low' : 'success'}`}>
-                    {serverMetrics.utilization.toFixed(2)}%
-                  </div>
-                  <div className="result-status">
-                    {serverMetrics.utilization > 85 ? (
-                      <span className="status-warning">High - Risk of overload</span>
-                    ) : serverMetrics.utilization < 50 ? (
-                      <span className="status-info">Low - Underutilized</span>
-                    ) : (
-                      <span className="status-success">Optimal range (70-85%)</span>
-                    )}
-                  </div>
+              </>
+            ) : (
+              <div className="error-message">
+                <div className="error-icon">⚠</div>
+                <div className="error-text">
+                  {serverMetrics?.error || 'Invalid configuration. Please check your inputs.'}
                 </div>
-
-                <div className="result-card">
-                  <div className="result-label">Probability of Queueing per Server</div>
-                  <div className={`result-value ${serverMetrics.meetsProbabilitySLA ? 'success' : 'warning'}`}>
-                    {serverMetrics.probabilityDelay.toFixed(2)}%
-                  </div>
-                  <div className="result-status">
-                    {serverMetrics.meetsProbabilitySLA ? (
-                      <span className="status-success">✓ Meets SLA ({maxProbabilityDelay}%)</span>
-                    ) : (
-                      <span className="status-warning">⚠ Exceeds SLA ({maxProbabilityDelay}%)</span>
-                    )}
-                  </div>
+                <div className="error-hint">
+                  Ensure: Traffic Intensity per Server &lt; Workers per Server
                 </div>
               </div>
+            )}
+          </div>
 
-              <div className="detailed-metrics">
-                <h4>Detailed Metrics</h4>
-                <div className="metrics-table">
-                  <div className="metric-row">
-                    <span className="metric-name">Arrival Rate per Server:</span>
-                    <span className="metric-value">{serverMetrics.arrivalRatePerServer.toFixed(2)} req/sec</span>
-                  </div>
-                  <div className="metric-row">
-                    <span className="metric-name">Traffic Intensity per Server:</span>
-                    <span className="metric-value">{serverMetrics.trafficIntensityPerServer.toFixed(2)} Erlangs</span>
-                  </div>
-                  <div className="metric-row">
-                    <span className="metric-name">Total Workers:</span>
-                    <span className="metric-value">{numServers * workersPerServer}</span>
-                  </div>
-                  <div className="metric-row">
-                    <span className="metric-name">System Stability:</span>
-                    <span className="metric-value stability-stable">✓ Stable (A &lt; N)</span>
-                  </div>
-                </div>
-
-                <h4 className="cost-details-header">Cost Breakdown</h4>
-                <div className="metrics-table">
-                  <div className="metric-row">
-                    <span className="metric-name">Total Cost per Worker:</span>
-                    <span className="metric-value">${(costPerWorker * numServers * workersPerServer).toFixed(2)}</span>
-                  </div>
-                  <div className="metric-row">
-                    <span className="metric-name">Total Cost of Per Server Overhead:</span>
-                    <span className="metric-value">${(perServerOverhead * numServers).toFixed(2)}</span>
-                  </div>
-                  <div className="metric-row">
-                    <span className="metric-name">Total Cost per Server:</span>
-                    <span className="metric-value">${((costPerWorker * workersPerServer) + perServerOverhead).toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="error-message">
-              <div className="error-icon">⚠</div>
-              <div className="error-text">
-                {serverMetrics?.error || 'Invalid configuration. Please check your inputs.'}
-              </div>
-              <div className="error-hint">
-                Ensure: Traffic Intensity per Server &lt; Workers per Server
-              </div>
-            </div>
-          )}
+          <FleetVisualizations
+            totalArrivalRate={totalArrivalRate}
+            serviceTime={serviceTime}
+            numServers={numServers}
+            workersPerServer={workersPerServer}
+            targetUtilization={targetUtilization}
+            maxWaitTimeMs={maxWaitTimeMs}
+            maxProbabilityDelay={maxProbabilityDelay}
+            costPerWorker={costPerWorker}
+            perServerOverhead={perServerOverhead}
+            optMinWorkers={optMinWorkers}
+            optMaxWorkers={optMaxWorkers}
+          />
         </div>
       </div>
 
