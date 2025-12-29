@@ -1,21 +1,40 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   calculateTrafficIntensity,
   calculateUtilization,
   averageWaitingTime,
   erlangC
 } from '../utils/erlangC';
+import ConfigurationManager from './ConfigurationManager';
 import './FleetOptimizationTab.css';
 
 function FleetOptimizationTab() {
-  const [totalArrivalRate, setTotalArrivalRate] = useState(100); // requests per second
-  const [serviceTimeMs, setServiceTimeMs] = useState(50); // milliseconds
-  const [numServers, setNumServers] = useState(3);
-  const [workersPerServer, setWorkersPerServer] = useState(5);
-  const [maxWaitTimeMs, setMaxWaitTimeMs] = useState(200);
-  const [maxProbabilityDelay, setMaxProbabilityDelay] = useState(10); // percentage
-  const [perServerOverhead, setPerServerOverhead] = useState(0);
-  const [costPerWorker, setCostPerWorker] = useState(10);
+  // Helper function to parse query params
+  const getQueryParam = (name, defaultValue) => {
+    const params = new URLSearchParams(window.location.search);
+    const value = params.get(name);
+    if (value === null) return defaultValue;
+    const numValue = Number(value);
+    return isNaN(numValue) ? defaultValue : numValue;
+  };
+
+  const getQueryParamBool = (name, defaultValue) => {
+    const params = new URLSearchParams(window.location.search);
+    const value = params.get(name);
+    if (value === null) return defaultValue;
+    return value === 'true' || value === '1';
+  };
+
+  const [totalArrivalRate, setTotalArrivalRate] = useState(() => getQueryParam('arrivalRate', 100)); // requests per second
+  const [serviceTimeMs, setServiceTimeMs] = useState(() => getQueryParam('serviceTime', 50)); // milliseconds
+  const [numServers, setNumServers] = useState(() => getQueryParam('servers', 3));
+  const [workersPerServer, setWorkersPerServer] = useState(() => getQueryParam('workers', 5));
+  const [targetUtilization, setTargetUtilization] = useState(() => getQueryParam('utilization', 75)); // percentage
+  const [useTargetUtilization, setUseTargetUtilization] = useState(() => getQueryParamBool('autoUtil', false));
+  const [maxWaitTimeMs, setMaxWaitTimeMs] = useState(() => getQueryParam('maxWait', 200));
+  const [maxProbabilityDelay, setMaxProbabilityDelay] = useState(() => getQueryParam('maxProb', 10)); // percentage
+  const [perServerOverhead, setPerServerOverhead] = useState(() => getQueryParam('overhead', 0));
+  const [costPerWorker, setCostPerWorker] = useState(() => getQueryParam('costWorker', 10));
 
   // Dynamic min/max values for sliders (can be overridden by direct input)
   const [minArrivalRate, setMinArrivalRate] = useState(10);
@@ -30,9 +49,56 @@ function FleetOptimizationTab() {
   const [maxWaitTime, setMaxWaitTime] = useState(1000);
   const [minProbabilityDelay, setMinProbabilityDelay] = useState(0);
   const [maxProbabilityDelaySlider, setMaxProbabilityDelaySlider] = useState(100);
+  const [minTargetUtilization, setMinTargetUtilization] = useState(10);
+  const [maxTargetUtilization, setMaxTargetUtilization] = useState(95);
 
   // Convert service time from ms to seconds for calculations
   const serviceTime = serviceTimeMs / 1000;
+
+  // Calculate current utilization
+  const currentUtilization = useMemo(() => {
+    if (numServers <= 0 || workersPerServer <= 0) return 0;
+    const arrivalRatePerServer = totalArrivalRate / numServers;
+    const trafficIntensityPerServer = calculateTrafficIntensity(arrivalRatePerServer, serviceTime);
+    return calculateUtilization(workersPerServer, trafficIntensityPerServer);
+  }, [totalArrivalRate, serviceTime, numServers, workersPerServer]);
+
+  // Calculate required servers for target utilization
+  const calculateServersForUtilization = useMemo(() => {
+    if (!useTargetUtilization || workersPerServer <= 0 || targetUtilization <= 0) {
+      return numServers;
+    }
+    // Utilization = (A_per_server / N_workers) * 100
+    // A_per_server = (total_arrival_rate / num_servers) * service_time
+    // target_utilization = ((total_arrival_rate / num_servers) * service_time / workers_per_server) * 100
+    // Solving for num_servers:
+    // num_servers = (total_arrival_rate * service_time * 100) / (target_utilization * workers_per_server)
+    const totalTrafficIntensity = calculateTrafficIntensity(totalArrivalRate, serviceTime);
+    const requiredServers = Math.ceil((totalTrafficIntensity * 100) / (targetUtilization * workersPerServer));
+    return Math.max(1, requiredServers);
+  }, [useTargetUtilization, targetUtilization, totalArrivalRate, serviceTime, workersPerServer, numServers]);
+
+  // Update servers when target utilization changes (only if auto-adjust is enabled)
+  useEffect(() => {
+    if (useTargetUtilization) {
+      const newServers = calculateServersForUtilization;
+      if (newServers !== numServers && newServers > 0) {
+        setNumServers(newServers);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useTargetUtilization, targetUtilization, totalArrivalRate, serviceTimeMs, workersPerServer]);
+
+  // Update target utilization display when servers change (if not manually controlling utilization)
+  useEffect(() => {
+    if (!useTargetUtilization && currentUtilization > 0 && currentUtilization <= 100) {
+      const roundedUtil = Math.round(currentUtilization);
+      if (Math.abs(roundedUtil - targetUtilization) > 0.5) {
+        setTargetUtilization(roundedUtil);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [numServers, workersPerServer, totalArrivalRate, serviceTimeMs]);
 
   // Function to calculate new min/max: max = 2×value, min = value/2
   const calculateNewRange = (value) => {
@@ -90,6 +156,66 @@ function FleetOptimizationTab() {
     }
     return (costPerWorker * numServers * workersPerServer) + (perServerOverhead * numServers);
   }, [numServers, workersPerServer, costPerWorker, perServerOverhead]);
+
+  // Helper function to update URL query params
+  const updateQueryParams = (updates) => {
+    const params = new URLSearchParams(window.location.search);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        params.set(key, value.toString());
+      } else {
+        params.delete(key);
+      }
+    });
+    const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+    window.history.replaceState({}, '', newUrl);
+  };
+
+  // Update URL when parameters change
+  useEffect(() => {
+    updateQueryParams({
+      arrivalRate: totalArrivalRate,
+      serviceTime: serviceTimeMs,
+      servers: numServers,
+      workers: workersPerServer,
+      utilization: targetUtilization,
+      autoUtil: useTargetUtilization,
+      maxWait: maxWaitTimeMs,
+      maxProb: maxProbabilityDelay,
+      overhead: perServerOverhead,
+      costWorker: costPerWorker
+    });
+  }, [totalArrivalRate, serviceTimeMs, numServers, workersPerServer, targetUtilization, useTargetUtilization, maxWaitTimeMs, maxProbabilityDelay, perServerOverhead, costPerWorker]);
+
+  // Get current configuration for saving
+  const getCurrentConfig = () => {
+    return {
+      totalArrivalRate,
+      serviceTimeMs,
+      numServers,
+      workersPerServer,
+      targetUtilization,
+      useTargetUtilization,
+      maxWaitTimeMs,
+      maxProbabilityDelay,
+      perServerOverhead,
+      costPerWorker
+    };
+  };
+
+  // Load a saved configuration
+  const handleLoadConfig = (config) => {
+    setTotalArrivalRate(config.totalArrivalRate);
+    setServiceTimeMs(config.serviceTimeMs);
+    setNumServers(config.numServers);
+    setWorkersPerServer(config.workersPerServer);
+    setTargetUtilization(config.targetUtilization);
+    setUseTargetUtilization(config.useTargetUtilization || false);
+    setMaxWaitTimeMs(config.maxWaitTimeMs);
+    setMaxProbabilityDelay(config.maxProbabilityDelay);
+    setPerServerOverhead(config.perServerOverhead);
+    setCostPerWorker(config.costPerWorker);
+  };
 
   return (
     <div className="fleet-optimization-tab">
@@ -188,9 +314,78 @@ function FleetOptimizationTab() {
 
           <div className="input-section">
             <h4 className="input-section-title">Server Configuration</h4>
+            
+            <div className="input-group">
+              <label>
+                <span className="label-text">Target Utilization</span>
+                <span className="label-unit">(%)</span>
+                <input
+                  type="checkbox"
+                  checked={useTargetUtilization}
+                  onChange={(e) => setUseTargetUtilization(e.target.checked)}
+                  className="utilization-toggle"
+                />
+                <span className="toggle-label">Auto-adjust servers</span>
+              </label>
+              <div className="slider-input-container">
+                <input
+                  type="range"
+                  min={minTargetUtilization}
+                  max={maxTargetUtilization}
+                  step="1"
+                  value={targetUtilization}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    setTargetUtilization(val);
+                    if (val < minTargetUtilization || val > maxTargetUtilization) {
+                      const { newMin, newMax } = calculateNewRange(val);
+                      setMinTargetUtilization(Math.max(10, Math.floor(newMin)));
+                      setMaxTargetUtilization(Math.min(95, Math.ceil(newMax)));
+                    }
+                  }}
+                  className="slider-input"
+                />
+                <input
+                  type="number"
+                  step="0.1"
+                  value={targetUtilization}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (!isNaN(val) && val >= 0 && val <= 100) {
+                      setTargetUtilization(val);
+                      if (val < minTargetUtilization || val > maxTargetUtilization) {
+                        const { newMin, newMax } = calculateNewRange(val);
+                        setMinTargetUtilization(Math.max(10, Math.floor(newMin)));
+                        setMaxTargetUtilization(Math.min(95, Math.ceil(newMax)));
+                      }
+                    } else if (e.target.value === '' || e.target.value === '-') {
+                      setTargetUtilization(0);
+                    }
+                  }}
+                  className="number-input"
+                />
+              </div>
+              <div className="utilization-info">
+                {useTargetUtilization ? (
+                  <span className="info-text">
+                    Current: {currentUtilization.toFixed(1)}% | 
+                    Required Servers: {calculateServersForUtilization}
+                  </span>
+                ) : (
+                  <span className="info-text">
+                    Current Utilization: {currentUtilization.toFixed(1)}%
+                  </span>
+                )}
+              </div>
+            </div>
             <div className="input-group">
               <label>
                 <span className="label-text">Number of Servers</span>
+                {useTargetUtilization && (
+                  <span className="label-unit" style={{ color: '#999', fontStyle: 'italic', marginLeft: '0.5rem' }}>
+                    (auto-adjusted)
+                  </span>
+                )}
               </label>
             <div className="slider-input-container">
               <input
@@ -201,12 +396,15 @@ function FleetOptimizationTab() {
                 value={numServers}
                 onChange={(e) => setNumServers(Number(e.target.value))}
                 className="slider-input"
+                disabled={useTargetUtilization}
+                style={{ opacity: useTargetUtilization ? 0.5 : 1, cursor: useTargetUtilization ? 'not-allowed' : 'pointer' }}
               />
               <input
                 type="number"
                 step="1"
                 value={numServers}
                   onChange={(e) => {
+                    if (useTargetUtilization) return;
                     const val = Number(e.target.value);
                     if (!isNaN(val) && val > 0) {
                       const intVal = Math.floor(val);
@@ -221,6 +419,8 @@ function FleetOptimizationTab() {
                     }
                   }}
                 className="number-input"
+                disabled={useTargetUtilization}
+                style={{ opacity: useTargetUtilization ? 0.5 : 1, cursor: useTargetUtilization ? 'not-allowed' : 'text' }}
               />
             </div>
           </div>
@@ -505,6 +705,11 @@ function FleetOptimizationTab() {
           )}
         </div>
       </div>
+
+      <ConfigurationManager
+        currentConfig={getCurrentConfig()}
+        onLoadConfig={handleLoadConfig}
+      />
     </div>
   );
 }

@@ -2,6 +2,8 @@
 
 A React application that visualizes the Erlang C formula applied to web server capacity planning. This tool helps you optimize the number of workers/threads needed to handle incoming requests while meeting your SLA requirements.
 
+> ⚠️ **Disclaimer**: This project was entirely vibe coded, but human validated and tested. Don't look too much into the code - it's functional! See [DISCLAIMER.md](./DISCLAIMER.md) for details.
+
 ## What is Erlang C?
 
 The Erlang C formula, developed by Danish mathematician A.K. Erlang in 1917, is a queueing theory model used to predict the probability that a call will be delayed (queued) in a call center system. It's particularly useful for capacity planning and resource allocation.
@@ -82,6 +84,15 @@ The application will open at `http://localhost:3000`
 ```bash
 npm run build
 ```
+
+### Deploying to GitHub Pages
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+
+Quick deployment:
+1. Update the `homepage` field in `package.json` with your GitHub username
+2. Run `npm run deploy`
+3. Enable GitHub Pages in your repository settings (use `gh-pages` branch)
 
 ## How to Use
 
@@ -168,10 +179,30 @@ The optimization tool uses Erlang C to find the best configuration by:
 - **Recharts** - Charting library
 - **CSS3** - Styling
 
+## Embedding in Articles
+
+You can embed this app in articles, blog posts, or websites using an iframe. See [EMBED.md](./EMBED.md) for complete embedding documentation and examples.
+
+### Quick Embed Example
+
+```html
+<iframe 
+  src="https://YOUR_USERNAME.github.io/erlang-c" 
+  width="100%" 
+  height="900px" 
+  frameborder="0"
+  title="Erlang C Web Server Capacity Planner">
+</iframe>
+```
+
+## Disclaimer
+
+⚠️ **Important**: This project was entirely vibe coded, but human validated and tested. The Erlang C formulas are mathematically correct and the app functions properly, but don't look too much into the code quality. See [DISCLAIMER.md](./DISCLAIMER.md) for full details.
+
 ## License
 
 This project is open source and available for educational purposes.
 
 ## Contributing
 
-Contributions, issues, and feature requests are welcome!
+Contributions, issues, and feature requests are welcome! But please note: code quality improvements are welcome, but functionality and mathematical accuracy are the priorities.

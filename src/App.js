@@ -15,14 +15,24 @@ function App() {
       </header>
       <div className="App-content">
         <Tabs defaultTab={0}>
-          <Tab label="Individual Server Optimization">
+          <Tab label="Individual Server Optimization" id="individual">
             <IndividualServerTab />
           </Tab>
-          <Tab label="Fleet Optimization">
+          <Tab label="Fleet Optimization" id="fleet">
             <FleetOptimizationTab />
           </Tab>
         </Tabs>
       </div>
+      <footer className="App-footer">
+        <p>
+          <small>
+            ⚠️ Vibe coded, human validated & tested. 
+            <a href="https://github.com/YOUR_USERNAME/erlang-c/blob/main/DISCLAIMER.md" target="_blank" rel="noopener noreferrer" style={{ marginLeft: '0.5rem', color: 'inherit', textDecoration: 'underline' }}>
+              See disclaimer
+            </a>
+          </small>
+        </p>
+      </footer>
     </div>
   );
 }

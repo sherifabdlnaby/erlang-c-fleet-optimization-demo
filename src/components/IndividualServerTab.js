@@ -12,8 +12,7 @@ import {
 import {
   generateDataPoints,
   calculateTrafficIntensity,
-  findMinWorkers,
-  averageWaitingTime
+  findMinWorkers
 } from '../utils/erlangC';
 import ExplanationPanel from './ExplanationPanel';
 import './IndividualServerTab.css';
