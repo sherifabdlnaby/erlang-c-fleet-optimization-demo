@@ -57,6 +57,14 @@
   --chart-quaternary: #9b51e0;
   --chart-grid: rgba(55, 53, 47, 0.06);
   --chart-axis: rgba(55, 53, 47, 0.25);
+  
+  /* Legacy chart colors (for migration) - mapped to design system */
+  --chart-purple: var(--accent);
+  --chart-purple-gradient: linear-gradient(135deg, var(--accent) 0%, var(--secondary) 100%);
+  --chart-blue: var(--tertiary);
+  --chart-green: var(--success);
+  --chart-orange: var(--warning);
+  --chart-yellow: #ffc658;
 
   /* Borders & dividers */
   --border-subtle: rgba(55, 53, 47, 0.06);
