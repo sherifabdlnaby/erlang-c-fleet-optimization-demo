@@ -319,11 +319,11 @@ function ServerOptimizer({ arrivalRate, serviceTime, maxWaitTimeMs }) {
                 }}
               />
               <Legend />
-              <Scatter name="Configurations" data={costPerformanceData} fill="#8884d8">
+              <Scatter name="Configurations" data={costPerformanceData} fill="var(--chart-primary)">
                 {costPerformanceData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
-                    fill={entry.score > 0.8 ? '#4caf50' : entry.score > 0.6 ? '#ff9800' : '#8884d8'} 
+                    fill={entry.score > 0.8 ? 'var(--success)' : entry.score > 0.6 ? 'var(--warning)' : 'var(--chart-primary)'} 
                   />
                 ))}
               </Scatter>

@@ -195,14 +195,14 @@ function ErlangCVisualizer() {
               <Line 
                 type="monotone" 
                 dataKey="waitTime" 
-                stroke="#8884d8" 
+                stroke="var(--chart-primary)" 
                 strokeWidth={2}
                 name="Average Wait Time"
               />
               <Line 
                 type="monotone" 
                 dataKey={(d) => maxWaitTimeMs} 
-                stroke="#ff0000" 
+                stroke="var(--danger)" 
                 strokeDasharray="5 5"
                 name="Target Max Wait"
               />
@@ -234,7 +234,7 @@ function ErlangCVisualizer() {
               <Line 
                 type="monotone" 
                 dataKey="probabilityDelay" 
-                stroke="#82ca9d" 
+                stroke="var(--chart-secondary)" 
                 strokeWidth={2}
                 name="Probability of Queueing"
               />
@@ -259,7 +259,7 @@ function ErlangCVisualizer() {
                 labelFormatter={(label) => `Workers: ${label}`}
               />
               <Legend />
-              <Bar dataKey="queueLength" fill="#ffc658" name="Average Queue Length" />
+              <Bar dataKey="queueLength" fill="var(--chart-yellow)" name="Average Queue Length" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -288,7 +288,7 @@ function ErlangCVisualizer() {
               <Line 
                 type="monotone" 
                 dataKey="utilization" 
-                stroke="#ff7300" 
+                stroke="var(--chart-tertiary)" 
                 strokeWidth={2}
                 name="Server Utilization"
               />

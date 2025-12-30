@@ -5,6 +5,7 @@ import {
   averageWaitingTime,
   erlangC
 } from '../utils/erlangC';
+import Modal from './Modal';
 import './ConfigurationManager.css';
 
 const STORAGE_KEY = 'erlangC_saved_configurations';
@@ -18,6 +19,7 @@ function ConfigurationManager({
   const [selectedConfigs, setSelectedConfigs] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
   const [configName, setConfigName] = useState('');
+  const [modalState, setModalState] = useState({ isOpen: false, type: 'info', title: '', message: '', onConfirm: null });
 
   // Load saved configurations from localStorage on mount
   useEffect(() => {
@@ -43,7 +45,13 @@ function ConfigurationManager({
 
   const handleSave = () => {
     if (!configName.trim()) {
-      alert('Please enter a name for this parameter set');
+      setModalState({
+        isOpen: true,
+        type: 'warning',
+        title: 'Missing Name',
+        message: 'Please enter a name for this parameter set',
+        onConfirm: null
+      });
       return;
     }
 
@@ -68,10 +76,18 @@ function ConfigurationManager({
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this parameter set?')) {
-      setSavedConfigs(prev => prev.filter(c => c.id !== id));
-      setSelectedConfigs(prev => prev.filter(cid => cid !== id));
-    }
+    const configToDelete = savedConfigs.find(c => c.id === id);
+    setModalState({
+      isOpen: true,
+      type: 'warning',
+      title: 'Delete Configuration',
+      message: `Are you sure you want to delete "${configToDelete?.name || 'this parameter set'}"? This action cannot be undone.`,
+      onConfirm: () => {
+        setSavedConfigs(prev => prev.filter(c => c.id !== id));
+        setSelectedConfigs(prev => prev.filter(cid => cid !== id));
+      },
+      showCancel: true
+    });
   };
 
   const toggleConfigSelection = (id) => {
@@ -86,7 +102,13 @@ function ConfigurationManager({
 
   const handleCompare = () => {
     if (selectedConfigs.length < 2) {
-      alert('Please select at least 2 parameter sets to compare');
+      setModalState({
+        isOpen: true,
+        type: 'info',
+        title: 'Select Configurations',
+        message: 'Please select at least 2 parameter sets to compare',
+        onConfirm: null
+      });
       return;
     }
     setShowComparison(true);
@@ -97,8 +119,19 @@ function ConfigurationManager({
   };
 
   return (
-    <div className="configuration-manager">
-      <div className="config-manager-header">
+    <>
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({ ...modalState, isOpen: false })}
+        title={modalState.title}
+        type={modalState.type}
+        onConfirm={modalState.onConfirm}
+        showCancel={modalState.showCancel}
+      >
+        <p>{modalState.message}</p>
+      </Modal>
+      <div className="configuration-manager">
+        <div className="config-manager-header">
         <h3>Saved Parameters</h3>
         <button 
           className="compare-btn"
@@ -121,11 +154,15 @@ function ConfigurationManager({
             }
           }}
           className="config-name-input"
+          aria-label="Configuration name input"
+          aria-required="true"
+          aria-invalid={!configName.trim()}
         />
         <button 
           onClick={handleSave}
           className="save-btn"
           disabled={!configName.trim()}
+          aria-label="Save current configuration"
         >
           Save Current Parameters
         </button>
@@ -165,7 +202,8 @@ function ConfigurationManager({
           ))
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -181,6 +219,7 @@ function ConfigItem({ config, isSelected, onSelect, onLoad, onDelete }) {
           checked={isSelected}
           onChange={onSelect}
           className="config-checkbox"
+          aria-label={`Select ${config.name} for comparison`}
         />
         <div className="config-info">
           <div className="config-name">{config.name}</div>
@@ -188,8 +227,20 @@ function ConfigItem({ config, isSelected, onSelect, onLoad, onDelete }) {
         </div>
       </div>
       <div className="config-actions">
-        <button onClick={onLoad} className="load-btn">Load</button>
-        <button onClick={onDelete} className="delete-btn">Delete</button>
+        <button 
+          onClick={onLoad} 
+          className="load-btn"
+          aria-label={`Load configuration ${config.name}`}
+        >
+          Load
+        </button>
+        <button 
+          onClick={onDelete} 
+          className="delete-btn"
+          aria-label={`Delete configuration ${config.name}`}
+        >
+          Delete
+        </button>
       </div>
     </div>
   );

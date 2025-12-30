@@ -44,17 +44,18 @@
 
 .load-balance-selector select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .overall-metrics-panel {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 8px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  background: var(--chart-purple-gradient);
+  border-radius: var(--radius-md);
 }
 
 .metric-card-large {
@@ -75,7 +76,7 @@
 .metric-value-large {
   font-size: 2rem;
   font-weight: bold;
-  color: #667eea;
+  color: var(--accent);
 }
 
 .servers-control-panel {
@@ -98,8 +99,8 @@
 }
 
 .server-control-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-accent);
 }
 
 .server-control-header {
@@ -157,23 +158,28 @@
 .worker-btn {
   width: 36px;
   height: 36px;
-  border: 2px solid #667eea;
-  background: white;
-  color: #667eea;
-  border-radius: 8px;
-  font-size: 1.5rem;
-  font-weight: bold;
+  border: 2px solid var(--accent);
+  background: var(--bg-surface);
+  color: var(--accent);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .worker-btn:hover:not(:disabled) {
-  background: #667eea;
-  color: white;
+  background: var(--accent);
+  color: var(--bg-primary);
   transform: scale(1.1);
+}
+
+.worker-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .worker-btn:disabled {
@@ -191,7 +197,7 @@
 .worker-number {
   font-size: 2rem;
   font-weight: bold;
-  color: #667eea;
+  color: var(--accent);
 }
 
 .worker-label {
@@ -244,20 +250,26 @@
 
 .add-server-btn {
   width: 100%;
-  padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  padding: var(--space-4);
+  background: var(--chart-purple-gradient);
+  color: var(--bg-primary);
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: bold;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  font-family: var(--font-display);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all var(--transition-base);
 }
 
 .add-server-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: var(--shadow-accent);
+}
+
+.add-server-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .multi-server-animation-area {
@@ -508,10 +520,10 @@
 }
 
 .optimization-insights {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border-left: 4px solid #667eea;
+  background: var(--bg-secondary);
+  padding: var(--space-6);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--accent);
 }
 
 .optimization-insights h4 {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   LineChart,
   Line,
@@ -14,6 +14,7 @@ import {
   calculateTrafficIntensity,
   findMinWorkers
 } from '../utils/erlangC';
+import { validateRange } from '../utils/validation';
 import ExplanationPanel from './ExplanationPanel';
 import './IndividualServerTab.css';
 
@@ -22,6 +23,7 @@ function IndividualServerTab() {
   const [serviceTime, setServiceTime] = useState(0.05);
   const [workers, setWorkers] = useState(10);
   const [maxWaitTimeMs, setMaxWaitTimeMs] = useState(200);
+  const [errors, setErrors] = useState({});
 
   const trafficIntensity = useMemo(() => {
     return calculateTrafficIntensity(arrivalRate, serviceTime);
@@ -55,12 +57,13 @@ function IndividualServerTab() {
             <h2>Server Configuration</h2>
             
             <div className="control-group">
-              <label>
+              <label htmlFor="arrival-rate-slider">
                 <span className="label-text">Request Arrival Rate</span>
                 <span className="label-unit">(req/sec)</span>
               </label>
               <div className="slider-input-container">
                 <input
+                  id="arrival-rate-slider"
                   type="range"
                   min="10"
                   max="500"
@@ -68,19 +71,38 @@ function IndividualServerTab() {
                   value={arrivalRate}
                   onChange={(e) => setArrivalRate(Number(e.target.value))}
                   className="slider-input"
+                  aria-label="Request arrival rate slider"
+                  aria-valuemin="10"
+                  aria-valuemax="500"
+                  aria-valuenow={arrivalRate}
                 />
                 <input
+                  id="arrival-rate-input"
                   type="number"
                   min="10"
                   max="500"
                   step="10"
                   value={arrivalRate}
                   onChange={(e) => {
-                    const val = Math.max(10, Math.min(500, Number(e.target.value) || 10));
-                    setArrivalRate(val);
+                    const val = Number(e.target.value);
+                    const validation = validateRange(val, 10, 500, 'Arrival rate');
+                    if (validation.isValid) {
+                      setArrivalRate(Math.max(10, Math.min(500, val || 10)));
+                      setErrors(prev => ({ ...prev, arrivalRate: null }));
+                    } else {
+                      setErrors(prev => ({ ...prev, arrivalRate: validation.error }));
+                    }
                   }}
-                  className="number-input"
+                  className={`number-input ${errors.arrivalRate ? 'input-error' : ''}`}
+                  aria-label="Request arrival rate input"
+                  aria-invalid={!!errors.arrivalRate}
+                  aria-describedby={errors.arrivalRate ? 'arrival-rate-error' : undefined}
                 />
+                {errors.arrivalRate && (
+                  <span id="arrival-rate-error" className="error-message" role="alert">
+                    {errors.arrivalRate}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -190,7 +212,11 @@ function IndividualServerTab() {
               </div>
             </div>
 
-            <button className="optimize-button" onClick={handleOptimize}>
+            <button 
+              className="optimize-button" 
+              onClick={handleOptimize}
+              aria-label={`Optimize workers to ${optimalWorkers}`}
+            >
               Optimize Workers ({optimalWorkers})
             </button>
           </div>

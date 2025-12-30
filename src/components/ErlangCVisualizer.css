@@ -58,7 +58,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #667eea;
+  background: var(--accent);
   cursor: pointer;
 }
 
@@ -66,7 +66,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #667eea;
+  background: var(--accent);
   cursor: pointer;
   border: none;
 }
@@ -74,7 +74,7 @@
 .value-display {
   text-align: center;
   font-weight: bold;
-  color: #667eea;
+  color: var(--accent);
   margin-top: 0.5rem;
   font-size: 1.1rem;
 }
@@ -109,26 +109,32 @@
 }
 
 .metric-value.highlight {
-  color: #667eea;
+  color: var(--accent);
 }
 
 .optimize-button {
   width: 100%;
-  padding: 1rem;
-  margin-top: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+  background: var(--chart-purple-gradient);
+  color: var(--bg-primary);
   border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: bold;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  font-family: var(--font-display);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all var(--transition-base);
 }
 
 .optimize-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: var(--shadow-accent);
+}
+
+.optimize-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .optimize-button:active {
@@ -175,7 +181,7 @@
 .metric-card-value {
   font-size: 2rem;
   font-weight: bold;
-  color: #667eea;
+  color: var(--accent);
 }
 
 .chart-container {

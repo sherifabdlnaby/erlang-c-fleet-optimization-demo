@@ -712,11 +712,6 @@ function FleetOptimizationTab() {
             </div>
           </div>
           </div>
-
-          <ConfigurationManager
-            currentConfig={getCurrentConfig()}
-            onLoadConfig={handleLoadConfig}
-          />
         </div>
 
         <div className="fleet-right-column">
@@ -853,6 +848,11 @@ function FleetOptimizationTab() {
           />
         </div>
       </div>
+
+      <ConfigurationManager
+        currentConfig={getCurrentConfig()}
+        onLoadConfig={handleLoadConfig}
+      />
 
       <div className="explanation-section">
         <ExplanationPanel />

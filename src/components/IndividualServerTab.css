@@ -146,6 +146,24 @@
   transition: all var(--transition-fast);
 }
 
+.number-input.input-error {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.number-input.input-error:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(235, 87, 87, 0.2);
+}
+
+.error-message {
+  display: block;
+  color: var(--danger);
+  font-size: var(--text-xs);
+  margin-top: var(--space-1);
+  font-weight: var(--font-medium);
+}
+
 .number-input:focus {
   outline: none;
   border-color: var(--accent);

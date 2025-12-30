@@ -264,17 +264,16 @@ function FleetVisualizations({
         {/* Chart 1: The Optimization Chain - Workers → Wait Time → Utilization → Servers */}
         {hasOptimizationData && (
         <div className="chart-container main-chart">
-          <h4>The Optimization Chain</h4>
           <p className="chart-subtitle">
             <strong>Strategy:</strong> More workers per server → Lower wait time → Higher utilization (using the wait time headroom) → Fewer servers needed
             <br />
             <span style={{ color: '#27ae60', fontWeight: '500' }}>All configurations shown meet SLA requirements.</span>
           </p>
-          <div style={{ position: 'relative', width: '100%', height: '479px' }}>
+          <div style={{ position: 'relative', width: '100%', height: '465px' }}>
             <div style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', transformOrigin: 'center', fontSize: '14px', fontWeight: '500', color: '#6b6b6b', zIndex: 1 }}>
               Wait Time (ms)
             </div>
-            <ResponsiveContainer width="100%" height={479}>
+            <ResponsiveContainer width="100%" height={465}>
               <ComposedChart data={optimizationChainData} margin={{ top: 10, right: 20, left: 60, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(55,53,47,0.06)" />
                 <XAxis

@@ -9,9 +9,9 @@ import './MultiServerVisualization.css';
 
 function MultiServerVisualization({ arrivalRate, serviceTime }) {
   const [servers, setServers] = useState([
-    { id: 1, workers: 5, color: '#667eea' },
-    { id: 2, workers: 5, color: '#764ba2' },
-    { id: 3, workers: 5, color: '#f093fb' }
+    { id: 1, workers: 5, color: 'var(--accent)' },
+    { id: 2, workers: 5, color: 'var(--secondary)' },
+    { id: 3, workers: 5, color: 'var(--chart-quaternary)' }
   ]);
   const [requests, setRequests] = useState([]);
   const [loadBalanceMethod, setLoadBalanceMethod] = useState('round-robin');
@@ -274,7 +274,14 @@ function MultiServerVisualization({ arrivalRate, serviceTime }) {
 
   const handleAddServer = () => {
     if (servers.length < 6) {
-      const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe', '#43e97b'];
+      const colors = [
+        'var(--accent)',
+        'var(--secondary)',
+        'var(--chart-quaternary)',
+        'var(--tertiary)',
+        'var(--chart-primary)',
+        'var(--success)'
+      ];
       const newServer = {
         id: Math.max(...servers.map(s => s.id)) + 1,
         workers: 5,
@@ -414,7 +421,7 @@ function MultiServerVisualization({ arrivalRate, serviceTime }) {
                   style={{
                     left: `${req.x}%`,
                     top: `${req.y}%`,
-                    borderColor: servers[req.targetServerIndex]?.color || '#667eea'
+                    borderColor: servers[req.targetServerIndex]?.color || 'var(--accent)'
                   }}
                 />
               ))}
