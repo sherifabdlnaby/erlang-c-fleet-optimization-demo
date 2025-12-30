@@ -1,126 +1,169 @@
+/* ============================================
+   TABS - Soft Gradient Navigation
+   Notion-inspired friendly tabs
+   ============================================ */
+
 .tabs-container {
   width: 100%;
 }
 
+/* ===== TAB HEADER ===== */
 .tabs-header {
   display: flex;
-  gap: 1rem;
-  border-bottom: 2px solid #e0e0e0;
-  margin-bottom: 2rem;
-  background: white;
-  padding: 0 1rem;
-  border-radius: 8px 8px 0 0;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: var(--space-8);
+  box-shadow: var(--shadow-md);
 }
 
 .tab-header-item {
-  display: flex;
-  flex-direction: column;
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 8px 8px 0 0;
-  padding: 0.5rem;
-  margin: -0.5rem;
+  padding: var(--space-4) var(--space-4);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+  border: 2px solid transparent;
+  background: transparent;
 }
 
 .tab-header-item:hover {
-  background: rgba(102, 126, 234, 0.1);
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+  background: var(--bg-secondary);
 }
 
+/* Active tab styling with colored shadow */
 .tab-header-item.active {
-  background: rgba(102, 126, 234, 0.1);
+  background: var(--bg-surface);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-accent);
 }
 
+/* ===== TAB BUTTON ===== */
 .tab-button {
-  padding: 1rem 2rem;
+  padding: 0;
   background: transparent;
   border: none;
-  border-bottom: 3px solid transparent;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #666;
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.3s ease;
-  position: relative;
-  margin-bottom: -2px;
-  border-radius: 8px 8px 0 0;
+  transition: color var(--transition-fast);
   width: 100%;
   text-align: center;
   pointer-events: none;
 }
 
 .tab-header-item:hover .tab-button {
-  color: #667eea;
-}
-
-.tab-header-item:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(102, 126, 234, 0.2);
+  color: var(--text-secondary);
 }
 
 .tab-button.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
-  font-weight: 600;
+  color: var(--accent);
 }
 
+/* ===== TAB DESCRIPTION ===== */
 .tab-description {
-  margin-top: 0.5rem;
-  padding: 0 0.5rem 0.5rem;
-  line-height: 1.4;
+  margin-top: var(--space-3);
+  padding: 0 var(--space-2);
+  line-height: var(--leading-relaxed);
   width: 100%;
   text-align: center;
 }
 
 .tab-description-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.25rem;
-  transition: color 0.3s ease;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+  transition: color var(--transition-fast);
   text-align: center;
 }
 
 .tab-description.active .tab-description-title {
-  color: #667eea;
+  color: var(--text-primary);
 }
 
 .tab-description-separator {
-  height: 1px;
-  background: #e0e0e0;
-  margin: 0.5rem auto;
-  width: 80%;
-  max-width: 200px;
+  height: 2px;
+  background: var(--border-default);
+  margin: var(--space-2) auto;
+  width: 40px;
+  border-radius: var(--radius-full);
+}
+
+.tab-description.active .tab-description-separator {
+  background: var(--accent);
 }
 
 .tab-description-text {
-  font-size: 0.7rem;
-  color: #666;
-  line-height: 1.4;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  line-height: var(--leading-relaxed);
   text-align: center;
 }
 
+.tab-description.active .tab-description-text {
+  color: var(--text-secondary);
+}
+
+/* ===== TAB CONTENT ===== */
 .tabs-content {
   width: 100%;
 }
 
 .tab-panel {
   width: 100%;
+  animation: fadeSlideIn var(--transition-slow) ease-out;
 }
 
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .tabs-header {
-    flex-wrap: wrap;
-    padding: 0.5rem;
+    flex-direction: column;
+    padding: var(--space-2);
+    gap: var(--space-2);
+  }
+
+  .tab-header-item {
+    padding: var(--space-3);
   }
 
   .tab-button {
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
+  }
+
+  .tab-description {
+    margin-top: var(--space-2);
+  }
+
+  .tab-description-title {
+    font-size: var(--text-xs);
+  }
+
+  .tab-description-text {
+    display: none;
+  }
+
+  .tab-description-separator {
+    display: none;
   }
 }

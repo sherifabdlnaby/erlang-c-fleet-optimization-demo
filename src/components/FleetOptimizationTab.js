@@ -482,7 +482,7 @@ function FleetOptimizationTab() {
           </div>
 
           <div className="input-section">
-            <h4 className="input-section-title">SLA Metric</h4>
+            <h4 className="input-section-title">SLAs</h4>
             <div className="input-group">
               <label>
                 <span className="label-text">Max Wait Time Tolerance</span>

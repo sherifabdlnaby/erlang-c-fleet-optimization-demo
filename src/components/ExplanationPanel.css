@@ -1,50 +1,111 @@
+/* ============================================
+   EXPLANATION PANEL - Knowledge Center
+   Tesla-inspired collapsible documentation
+   ============================================ */
+
 .explanation-panel {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   min-height: 100%;
   height: 100%;
+  box-shadow: var(--shadow-lg);
 }
 
+/* ===== HEADER - Collapsible trigger ===== */
 .explanation-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--bg-surface-elevated) 0%, var(--bg-surface) 100%);
+  color: var(--text-primary);
+  padding: var(--space-5) var(--space-6);
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: background 0.3s;
+  transition: all var(--transition-base);
+  border-bottom: 1px solid var(--border-subtle);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle accent glow on hover */
+.explanation-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, var(--accent-glow) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  pointer-events: none;
+}
+
+.explanation-header:hover::before {
+  opacity: 0.3;
 }
 
 .explanation-header:hover {
-  background: linear-gradient(135deg, #5568d3 0%, #653a8f 100%);
+  background: var(--bg-surface-elevated);
 }
 
 .explanation-header h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-tight);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  position: relative;
+  z-index: 1;
+}
+
+.explanation-header h2::before {
+  content: '';
+  width: 4px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: var(--radius-full);
 }
 
 .toggle-icon {
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
   line-height: 1;
+  color: var(--accent);
+  transition: transform var(--transition-base);
+  position: relative;
+  z-index: 1;
 }
 
+.explanation-header:hover .toggle-icon {
+  transform: scale(1.1);
+}
+
+/* ===== CONTENT ===== */
 .explanation-content {
-  padding: 2rem;
-  color: #333;
-  line-height: 1.6;
+  padding: var(--space-6);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
   flex: 1;
   overflow-y: auto;
+  animation: fadeInContent var(--transition-base) ease-out;
+}
+
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .explanation-content section {
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-8);
 }
 
 .explanation-content section:last-child {
@@ -52,87 +113,128 @@
 }
 
 .explanation-content h3 {
-  color: #667eea;
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
+  color: var(--accent);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-tight);
 }
 
 .explanation-content p {
-  margin-bottom: 1rem;
-  color: #555;
+  margin-bottom: var(--space-4);
+  color: var(--text-secondary);
 }
 
 .explanation-content ul,
 .explanation-content ol {
-  margin-left: 1.5rem;
-  margin-bottom: 1rem;
-  color: #555;
+  margin-left: var(--space-5);
+  margin-bottom: var(--space-4);
+  color: var(--text-secondary);
 }
 
 .explanation-content li {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
+  line-height: var(--leading-relaxed);
 }
 
 .explanation-content strong {
-  color: #333;
+  color: var(--text-primary);
+  font-weight: var(--font-semibold);
 }
 
+/* ===== FORMULA BOX ===== */
 .formula-box {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border-left: 4px solid #667eea;
+  background: var(--bg-surface-elevated);
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--accent);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--accent);
 }
 
 .formula-item {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-5);
 }
 
 .formula-item:last-child {
   margin-bottom: 0;
 }
 
+.formula-item strong {
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+}
+
 .formula-item code {
   display: block;
-  background: white;
-  padding: 0.75rem;
-  border-radius: 4px;
-  margin: 0.5rem 0;
-  font-size: 0.9rem;
-  color: #e83e8c;
+  background: var(--bg-surface);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  margin: var(--space-2) 0;
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  color: var(--accent);
   overflow-x: auto;
+  border: 1px solid var(--border-subtle);
 }
 
 .formula-item p {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-  color: #666;
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
   font-style: italic;
 }
 
+/* ===== REFERENCES ===== */
 .references {
   list-style: none;
-  margin-left: 0;
+  margin-left: 0 !important;
 }
 
 .references li {
-  margin-bottom: 1rem;
-  padding-left: 1rem;
-  border-left: 3px solid #667eea;
+  margin-bottom: var(--space-4) !important;
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--border-accent);
+  font-size: var(--text-sm);
 }
 
 .references a {
-  color: #667eea;
+  color: var(--accent);
   text-decoration: none;
+  transition: all var(--transition-fast);
 }
 
 .references a:hover {
+  color: var(--text-primary);
   text-decoration: underline;
 }
 
 .references ul {
-  margin-top: 0.5rem;
-  margin-left: 1rem;
+  margin-top: var(--space-2);
+  margin-left: var(--space-4);
+}
+
+.references em {
+  color: var(--text-muted);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .explanation-header {
+    padding: var(--space-4);
+  }
+
+  .explanation-header h2 {
+    font-size: var(--text-lg);
+  }
+
+  .explanation-content {
+    padding: var(--space-4);
+  }
+
+  .explanation-content h3 {
+    font-size: var(--text-base);
+  }
 }
 
 @media (min-width: 1024px) {

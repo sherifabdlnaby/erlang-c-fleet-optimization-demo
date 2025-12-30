@@ -268,29 +268,33 @@ function FleetVisualizations({
           <p className="chart-subtitle">
             <strong>Strategy:</strong> More workers per server → Lower wait time → Higher utilization (using the wait time headroom) → Fewer servers needed
             <br />
-            <span style={{ color: '#4caf50', fontWeight: '500' }}>All configurations shown meet SLA requirements.</span>
+            <span style={{ color: '#27ae60', fontWeight: '500' }}>All configurations shown meet SLA requirements.</span>
           </p>
           <div style={{ position: 'relative', width: '100%', height: '479px' }}>
-            <div style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', transformOrigin: 'center', fontSize: '14px', fontWeight: '500', color: '#666', zIndex: 1 }}>
+            <div style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', transformOrigin: 'center', fontSize: '14px', fontWeight: '500', color: '#6b6b6b', zIndex: 1 }}>
               Wait Time (ms)
             </div>
             <ResponsiveContainer width="100%" height={479}>
               <ComposedChart data={optimizationChainData} margin={{ top: 10, right: 20, left: 60, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="workersPerServer" 
-                  label={{ value: 'Workers per Server', position: 'insideBottom', offset: -5 }}
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(55,53,47,0.06)" />
+                <XAxis
+                  dataKey="workersPerServer"
+                  label={{ value: 'Workers per Server', position: 'insideBottom', offset: -5, fill: '#6b6b6b' }}
+                  stroke="#c7c7c7"
+                  tick={{ fill: '#6b6b6b' }}
                 />
-                <YAxis 
+                <YAxis
                   yAxisId="left"
                   tickFormatter={(value) => {
                     const num = Number(value);
                     return num % 1 === 0 ? num.toString() : num.toFixed(2);
                   }}
                   width={60}
+                  stroke="#c7c7c7"
+                  tick={{ fill: '#6b6b6b' }}
                 />
-                <YAxis 
-                  yAxisId="utilization" 
+                <YAxis
+                  yAxisId="utilization"
                   orientation="right"
                   domain={[0, 100]}
                   tickFormatter={(value) => {
@@ -299,9 +303,11 @@ function FleetVisualizations({
                     return `${formatted}%`;
                   }}
                   width={50}
+                  stroke="#c7c7c7"
+                  tick={{ fill: '#6b6b6b' }}
                 />
-                <YAxis 
-                  yAxisId="servers" 
+                <YAxis
+                  yAxisId="servers"
                   orientation="right"
                   domain={['dataMin', 'dataMax']}
                   tickFormatter={(value) => {
@@ -309,76 +315,94 @@ function FleetVisualizations({
                     return num % 1 === 0 ? num.toString() : num.toFixed(2);
                   }}
                   width={50}
+                  stroke="#c7c7c7"
+                  tick={{ fill: '#6b6b6b' }}
                 />
-              <Tooltip 
-                formatter={(value, name) => {
-                  if (name === 'Wait Time at Optimal Config (ms)') {
-                    const num = Number(value);
-                    const rounded = Math.round(num * 100) / 100;
-                    return `${rounded.toFixed(2)} ms`;
-                  }
-                  if (name === 'Max Feasible Utilization (%)') {
-                    const num = Number(value);
-                    const rounded = Math.round(num * 100) / 100;
-                    return `${rounded.toFixed(2)}%`;
-                  }
-                  if (name === 'Min Servers Required') {
-                    const num = Number(value);
-                    const rounded = Math.round(num * 100) / 100;
-                    return `${rounded.toFixed(2)} servers`;
-                  }
-                  if (typeof value === 'number') {
-                    const num = Number(value);
-                    const rounded = Math.round(num * 100) / 100;
-                    return rounded.toFixed(2);
-                  }
-                  return value;
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (!active || !payload || !payload.length) return null;
+                  return (
+                    <div style={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid rgba(55,53,47,0.12)',
+                      borderRadius: '10px',
+                      padding: '12px 16px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                    }}>
+                      <div style={{ color: '#37352f', fontWeight: '600', marginBottom: '8px', fontSize: '13px' }}>
+                        {label} workers/server
+                      </div>
+                      {payload.map((entry, index) => {
+                        const num = Number(entry.value);
+                        const rounded = Math.round(num * 100) / 100;
+                        let formattedValue = rounded.toFixed(2);
+                        if (entry.name.includes('Utilization')) formattedValue += '%';
+                        else if (entry.name.includes('Wait Time')) formattedValue += ' ms';
+                        else if (entry.name.includes('Servers')) formattedValue += ' servers';
+                        return (
+                          <div key={index} style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            gap: '16px',
+                            padding: '4px 0',
+                            fontSize: '12px'
+                          }}>
+                            <span style={{ color: '#6b6b6b' }}>{entry.name.replace(' at Optimal Config', '').replace(' (%)', '').replace(' (ms)', '')}</span>
+                            <span style={{ color: entry.color, fontWeight: '600' }}>{formattedValue}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
                 }}
-                labelFormatter={(label) => `${label} workers/server`}
               />
               <Legend wrapperStyle={{ paddingTop: '10px' }} />
-              <ReferenceLine 
+              <ReferenceLine
                 yAxisId="left"
-                y={maxWaitTimeMs} 
-                stroke="#f56565" 
-                strokeDasharray="3 3" 
-                label="SLA Threshold" 
+                y={maxWaitTimeMs}
+                stroke="#f2994a"
+                strokeDasharray="3 3"
+                label={{ value: 'SLA Threshold', fill: '#f2994a' }}
               />
-              <Line 
+              <Line
                 yAxisId="left"
-                type="monotone" 
-                dataKey="waitTimeAtOptimal" 
-                stroke="#f56565" 
+                type="monotone"
+                dataKey="waitTimeAtOptimal"
+                stroke="#f2994a"
                 strokeWidth={2}
                 name="Wait Time at Optimal Config (ms)"
-                dot={{ r: 3, fill: '#ffffff', stroke: '#f56565', strokeWidth: 1 }}
+                dot={{ r: 2, fill: '#ffffff', stroke: '#f2994a', strokeWidth: 1.5 }}
+                activeDot={{ r: 4, fill: '#f2994a', stroke: '#ffffff', strokeWidth: 2 }}
               />
-              <Line 
+              <Line
                 yAxisId="utilization"
-                type="monotone" 
-                dataKey="maxFeasibleUtilization" 
-                stroke="#8884d8" 
-                strokeWidth={3}
+                type="monotone"
+                dataKey="maxFeasibleUtilization"
+                stroke="#0EA5E9"
+                strokeWidth={2}
                 name="Max Feasible Utilization (%)"
-                dot={{ r: 3, fill: '#ffffff', stroke: '#8884d8', strokeWidth: 1 }}
+                dot={{ r: 2, fill: '#ffffff', stroke: '#0EA5E9', strokeWidth: 1.5 }}
+                activeDot={{ r: 4, fill: '#0EA5E9', stroke: '#ffffff', strokeWidth: 2 }}
               />
-              <Line 
+              <Line
                 yAxisId="servers"
-                type="monotone" 
-                dataKey="minServersRequired" 
-                stroke="#82ca9d" 
-                strokeWidth={3}
+                type="monotone"
+                dataKey="minServersRequired"
+                stroke="#27ae60"
+                strokeWidth={2}
                 name="Min Servers Required"
-                dot={{ r: 3, fill: '#ffffff', stroke: '#82ca9d', strokeWidth: 1 }}
+                dot={{ r: 2, fill: '#ffffff', stroke: '#27ae60', strokeWidth: 1.5 }}
+                activeDot={{ r: 4, fill: '#27ae60', stroke: '#ffffff', strokeWidth: 2 }}
               />
               {currentAnalysis && currentAnalysis.meetsSLA && (
-                <ReferenceLine 
+                <ReferenceLine
                   yAxisId="left"
-                  x={currentAnalysis.workersPerServer} 
-                  stroke="#000" 
+                  x={currentAnalysis.workersPerServer}
+                  stroke="#9b9b9b"
                   strokeWidth={2}
                   strokeDasharray="5 5"
-                  label="Current"
+                  label={{ value: 'Current', fill: '#6b6b6b' }}
                 />
               )}
               </ComposedChart>

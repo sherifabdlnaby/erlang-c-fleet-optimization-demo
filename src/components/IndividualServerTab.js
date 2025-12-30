@@ -82,44 +82,41 @@ function IndividualServerTab() {
                   className="number-input"
                 />
               </div>
-              <div className="value-display">{arrivalRate} req/sec</div>
             </div>
 
             <div className="control-group">
               <label>
                 <span className="label-text">Average Service Time</span>
-                <span className="label-unit">(seconds)</span>
+                <span className="label-unit">(ms)</span>
               </label>
               <div className="slider-input-container">
                 <input
                   type="range"
-                  min="0.01"
-                  max="0.5"
-                  step="0.01"
-                  value={serviceTime}
-                  onChange={(e) => setServiceTime(Number(e.target.value))}
+                  min="10"
+                  max="500"
+                  step="10"
+                  value={Math.round(serviceTime * 1000)}
+                  onChange={(e) => setServiceTime(Number(e.target.value) / 1000)}
                   className="slider-input"
                 />
                 <input
                   type="number"
-                  min="0.01"
-                  max="0.5"
-                  step="0.01"
-                  value={serviceTime}
+                  min="10"
+                  max="500"
+                  step="10"
+                  value={Math.round(serviceTime * 1000)}
                   onChange={(e) => {
-                    const val = Math.max(0.01, Math.min(0.5, Number(e.target.value) || 0.01));
-                    setServiceTime(val);
+                    const val = Math.max(10, Math.min(500, Number(e.target.value) || 10));
+                    setServiceTime(val / 1000);
                   }}
                   className="number-input"
                 />
               </div>
-              <div className="value-display">{(serviceTime * 1000).toFixed(0)} ms</div>
             </div>
 
             <div className="control-group">
               <label>
                 <span className="label-text">Number of Workers</span>
-                <span className="label-unit">(servers)</span>
               </label>
               <div className="slider-input-container">
                 <input
@@ -146,7 +143,6 @@ function IndividualServerTab() {
                   className="number-input"
                 />
               </div>
-              <div className="value-display">{workers} workers</div>
             </div>
 
             <div className="control-group">
@@ -177,7 +173,6 @@ function IndividualServerTab() {
                   className="number-input"
                 />
               </div>
-              <div className="value-display">{maxWaitTimeMs} ms</div>
             </div>
 
             <div className="metrics-summary">
@@ -238,28 +233,59 @@ function IndividualServerTab() {
               <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={dataPoints} margin={{ top: 5, right: 30, left: 20, bottom: 25 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="workers" 
-                      label={{ value: 'Number of Workers', position: 'insideBottom', offset: -5 }}
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(55,53,47,0.06)" />
+                    <XAxis
+                      dataKey="workers"
+                      label={{ value: 'Number of Workers', position: 'insideBottom', offset: -5, fill: '#6b6b6b' }}
+                      stroke="#c7c7c7"
+                      tick={{ fill: '#6b6b6b' }}
                     />
-                    <YAxis 
-                      label={{ value: 'Probability (%)', angle: -90, position: 'insideLeft' }}
+                    <YAxis
+                      label={{ value: 'Probability (%)', angle: -90, position: 'insideLeft', fill: '#6b6b6b' }}
+                      stroke="#c7c7c7"
+                      tick={{ fill: '#6b6b6b' }}
                     />
-                    <Tooltip 
-                      formatter={(value) => {
-                        const num = Number(value);
-                        const rounded = Math.round(num * 100) / 100;
-                        return `${rounded.toFixed(2)}%`;
+                    <Tooltip
+                      content={({ active, payload, label }) => {
+                        if (!active || !payload || !payload.length) return null;
+                        return (
+                          <div style={{
+                            backgroundColor: '#ffffff',
+                            border: '1px solid rgba(55,53,47,0.12)',
+                            borderRadius: '10px',
+                            padding: '12px 16px',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                          }}>
+                            <div style={{ color: '#37352f', fontWeight: '600', marginBottom: '8px', fontSize: '13px' }}>
+                              {label} workers
+                            </div>
+                            {payload.map((entry, index) => (
+                              <div key={index} style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                gap: '16px',
+                                padding: '4px 0',
+                                fontSize: '12px'
+                              }}>
+                                <span style={{ color: '#6b6b6b' }}>{entry.name}</span>
+                                <span style={{ color: entry.color, fontWeight: '600' }}>
+                                  {(Math.round(Number(entry.value) * 100) / 100).toFixed(2)}%
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        );
                       }}
-                      labelFormatter={(label) => `Workers: ${label}`}
                     />
                     <Legend wrapperStyle={{ paddingTop: '5px' }} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="probabilityDelay" 
-                      stroke="#82ca9d" 
+                    <Line
+                      type="monotone"
+                      dataKey="probabilityDelay"
+                      stroke="#27ae60"
                       strokeWidth={2}
+                      dot={{ fill: '#27ae60', strokeWidth: 0, r: 2 }}
+                      activeDot={{ r: 4, fill: '#27ae60', stroke: '#ffffff', strokeWidth: 2 }}
                       name="Probability of Queueing"
                     />
                   </LineChart>
@@ -272,28 +298,59 @@ function IndividualServerTab() {
               <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={dataPoints} margin={{ top: 5, right: 30, left: 20, bottom: 25 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="workers" 
-                      label={{ value: 'Number of Workers', position: 'insideBottom', offset: -5 }}
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(55,53,47,0.06)" />
+                    <XAxis
+                      dataKey="workers"
+                      label={{ value: 'Number of Workers', position: 'insideBottom', offset: -5, fill: '#6b6b6b' }}
+                      stroke="#c7c7c7"
+                      tick={{ fill: '#6b6b6b' }}
                     />
-                    <YAxis 
-                      label={{ value: 'Utilization (%)', angle: -90, position: 'insideLeft' }}
+                    <YAxis
+                      label={{ value: 'Utilization (%)', angle: -90, position: 'insideLeft', fill: '#6b6b6b' }}
+                      stroke="#c7c7c7"
+                      tick={{ fill: '#6b6b6b' }}
                     />
-                    <Tooltip 
-                      formatter={(value) => {
-                        const num = Number(value);
-                        const rounded = Math.round(num * 100) / 100;
-                        return `${rounded.toFixed(2)}%`;
+                    <Tooltip
+                      content={({ active, payload, label }) => {
+                        if (!active || !payload || !payload.length) return null;
+                        return (
+                          <div style={{
+                            backgroundColor: '#ffffff',
+                            border: '1px solid rgba(55,53,47,0.12)',
+                            borderRadius: '10px',
+                            padding: '12px 16px',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                          }}>
+                            <div style={{ color: '#37352f', fontWeight: '600', marginBottom: '8px', fontSize: '13px' }}>
+                              {label} workers
+                            </div>
+                            {payload.map((entry, index) => (
+                              <div key={index} style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                gap: '16px',
+                                padding: '4px 0',
+                                fontSize: '12px'
+                              }}>
+                                <span style={{ color: '#6b6b6b' }}>{entry.name}</span>
+                                <span style={{ color: entry.color, fontWeight: '600' }}>
+                                  {(Math.round(Number(entry.value) * 100) / 100).toFixed(2)}%
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        );
                       }}
-                      labelFormatter={(label) => `Workers: ${label}`}
                     />
                     <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="utilization" 
-                      stroke="#ff7300" 
+                    <Line
+                      type="monotone"
+                      dataKey="utilization"
+                      stroke="#0EA5E9"
                       strokeWidth={2}
+                      dot={{ fill: '#0EA5E9', strokeWidth: 0, r: 2 }}
+                      activeDot={{ r: 4, fill: '#0EA5E9', stroke: '#ffffff', strokeWidth: 2 }}
                       name="Server Utilization"
                     />
                   </LineChart>
