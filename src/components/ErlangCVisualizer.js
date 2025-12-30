@@ -184,7 +184,11 @@ function ErlangCVisualizer() {
                 label={{ value: 'Wait Time (ms)', angle: -90, position: 'insideLeft' }}
               />
               <Tooltip 
-                formatter={(value) => `${value.toFixed(2)} ms`}
+                formatter={(value) => {
+                  const num = Number(value);
+                  const rounded = Math.round(num * 100) / 100;
+                  return `${rounded.toFixed(2)} ms`;
+                }}
                 labelFormatter={(label) => `Workers: ${label}`}
               />
               <Legend />
@@ -219,7 +223,11 @@ function ErlangCVisualizer() {
                 label={{ value: 'Probability (%)', angle: -90, position: 'insideLeft' }}
               />
               <Tooltip 
-                formatter={(value) => `${value.toFixed(2)}%`}
+                formatter={(value) => {
+                  const num = Number(value);
+                  const rounded = Math.round(num * 100) / 100;
+                  return `${rounded.toFixed(2)}%`;
+                }}
                 labelFormatter={(label) => `Workers: ${label}`}
               />
               <Legend />
@@ -269,7 +277,11 @@ function ErlangCVisualizer() {
                 label={{ value: 'Utilization (%)', angle: -90, position: 'insideLeft' }}
               />
               <Tooltip 
-                formatter={(value) => `${value.toFixed(1)}%`}
+                formatter={(value) => {
+                  const num = Number(value);
+                  const rounded = Math.round(num * 100) / 100;
+                  return `${rounded.toFixed(2)}%`;
+                }}
                 labelFormatter={(label) => `Workers: ${label}`}
               />
               <Legend />

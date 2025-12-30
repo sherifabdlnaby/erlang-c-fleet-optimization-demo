@@ -286,20 +286,32 @@ function ServerOptimizer({ arrivalRate, serviceTime, maxWaitTimeMs }) {
               />
               <Tooltip 
                 formatter={(value, name) => {
-                  if (name === 'cost') return `$${value.toFixed(2)}`;
-                  if (name === 'waitTime') return `${value.toFixed(0)} ms`;
+                  if (name === 'cost') {
+                    const num = Number(value);
+                    const rounded = Math.round(num * 100) / 100;
+                    return `$${rounded.toFixed(2)}`;
+                  }
+                  if (name === 'waitTime') {
+                    const num = Number(value);
+                    const rounded = Math.round(num * 100) / 100;
+                    return `${rounded.toFixed(2)} ms`;
+                  }
                   return value;
                 }}
                 labelFormatter={(label) => ''}
                 content={({ active, payload }) => {
                   if (active && payload && payload[0]) {
                     const data = payload[0].payload;
+                    const utilizationNum = Number(data.utilization);
+                    const utilizationRounded = Math.round(utilizationNum * 100) / 100;
+                    const waitTimeNum = Number(data.waitTime);
+                    const waitTimeRounded = Math.round(waitTimeNum * 100) / 100;
                     return (
                       <div className="custom-tooltip">
                         <p><strong>{data.numServers} servers × {data.workersPerServer} workers</strong></p>
                         <p>Cost: ${data.cost.toFixed(2)}</p>
-                        <p>Wait Time: {data.waitTime.toFixed(0)} ms</p>
-                        <p>Utilization: {data.utilization.toFixed(1)}%</p>
+                        <p>Wait Time: {waitTimeRounded.toFixed(2)} ms</p>
+                        <p>Utilization: {utilizationRounded.toFixed(2)}%</p>
                       </div>
                     );
                   }

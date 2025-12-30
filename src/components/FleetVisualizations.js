@@ -258,31 +258,23 @@ function FleetVisualizations({
 
   return (
     <div className="fleet-visualizations">
-      <h3>Potential Optimizations</h3>
-      <p className="visualization-description">
-        <strong>Optimization Strategy:</strong> Increase workers per server → Lower wait time → Enable higher utilization 
-        (to get back to similar wait-time before the change) → Require fewer servers total.
-        <br />
-        This analysis explores optimal configurations that maximize utilization while meeting SLA requirements. 
-        All configurations shown meet your wait time and probability of delay constraints.
-      </p>
+      <h3>Optimization Analysis</h3>
       
       <div className="visualizations-grid">
         {/* Chart 1: The Optimization Chain - Workers → Wait Time → Utilization → Servers */}
         {hasOptimizationData && (
         <div className="chart-container main-chart">
-          <h4>The Optimization Chain: Workers → Lower Wait Time → Higher Utilization → Fewer Servers</h4>
+          <h4>The Optimization Chain</h4>
           <p className="chart-subtitle">
-            <strong>Thought Process:</strong> By increasing workers per server, we reduce wait time. 
-            This lower wait time allows us to increase utilization (handling more traffic per server) 
-            while still meeting SLA requirements. Higher utilization means we need fewer servers total. 
-            <strong> All configurations shown here are optimal and meet SLA constraints.</strong>
+            <strong>Strategy:</strong> More workers per server → Lower wait time → Higher utilization (using the wait time headroom) → Fewer servers needed
+            <br />
+            <span style={{ color: '#4caf50', fontWeight: '500' }}>All configurations shown meet SLA requirements.</span>
           </p>
-          <div style={{ position: 'relative', width: '100%', height: '400px' }}>
+          <div style={{ position: 'relative', width: '100%', height: '479px' }}>
             <div style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', transformOrigin: 'center', fontSize: '14px', fontWeight: '500', color: '#666', zIndex: 1 }}>
               Wait Time (ms)
             </div>
-            <ResponsiveContainer width="100%" height={400}>
+            <ResponsiveContainer width="100%" height={479}>
               <ComposedChart data={optimizationChainData} margin={{ top: 10, right: 20, left: 60, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
@@ -320,17 +312,25 @@ function FleetVisualizations({
                 />
               <Tooltip 
                 formatter={(value, name) => {
-                  if (name === 'waitTimeAtOptimal') {
-                    return `${value} ms`;
+                  if (name === 'Wait Time at Optimal Config (ms)') {
+                    const num = Number(value);
+                    const rounded = Math.round(num * 100) / 100;
+                    return `${rounded.toFixed(2)} ms`;
                   }
-                  if (name === 'maxFeasibleUtilization') {
-                    return `${value}%`;
+                  if (name === 'Max Feasible Utilization (%)') {
+                    const num = Number(value);
+                    const rounded = Math.round(num * 100) / 100;
+                    return `${rounded.toFixed(2)}%`;
                   }
-                  if (name === 'minServersRequired') {
-                    return `${value} servers`;
+                  if (name === 'Min Servers Required') {
+                    const num = Number(value);
+                    const rounded = Math.round(num * 100) / 100;
+                    return `${rounded.toFixed(2)} servers`;
                   }
                   if (typeof value === 'number') {
-                    return value.toString();
+                    const num = Number(value);
+                    const rounded = Math.round(num * 100) / 100;
+                    return rounded.toFixed(2);
                   }
                   return value;
                 }}
@@ -351,7 +351,7 @@ function FleetVisualizations({
                 stroke="#f56565" 
                 strokeWidth={2}
                 name="Wait Time at Optimal Config (ms)"
-                dot={{ r: 3 }}
+                dot={{ r: 3, fill: '#ffffff', stroke: '#f56565', strokeWidth: 1 }}
               />
               <Line 
                 yAxisId="utilization"
@@ -360,7 +360,7 @@ function FleetVisualizations({
                 stroke="#8884d8" 
                 strokeWidth={3}
                 name="Max Feasible Utilization (%)"
-                dot={{ r: 4 }}
+                dot={{ r: 3, fill: '#ffffff', stroke: '#8884d8', strokeWidth: 1 }}
               />
               <Line 
                 yAxisId="servers"
@@ -369,7 +369,7 @@ function FleetVisualizations({
                 stroke="#82ca9d" 
                 strokeWidth={3}
                 name="Min Servers Required"
-                dot={{ r: 4 }}
+                dot={{ r: 3, fill: '#ffffff', stroke: '#82ca9d', strokeWidth: 1 }}
               />
               {currentAnalysis && currentAnalysis.meetsSLA && (
                 <ReferenceLine 

@@ -247,7 +247,11 @@ function IndividualServerTab() {
                       label={{ value: 'Probability (%)', angle: -90, position: 'insideLeft' }}
                     />
                     <Tooltip 
-                      formatter={(value) => `${value.toFixed(2)}%`}
+                      formatter={(value) => {
+                        const num = Number(value);
+                        const rounded = Math.round(num * 100) / 100;
+                        return `${rounded.toFixed(2)}%`;
+                      }}
                       labelFormatter={(label) => `Workers: ${label}`}
                     />
                     <Legend wrapperStyle={{ paddingTop: '5px' }} />
@@ -277,7 +281,11 @@ function IndividualServerTab() {
                       label={{ value: 'Utilization (%)', angle: -90, position: 'insideLeft' }}
                     />
                     <Tooltip 
-                      formatter={(value) => `${value.toFixed(1)}%`}
+                      formatter={(value) => {
+                        const num = Number(value);
+                        const rounded = Math.round(num * 100) / 100;
+                        return `${rounded.toFixed(2)}%`;
+                      }}
                       labelFormatter={(label) => `Workers: ${label}`}
                     />
                     <Legend wrapperStyle={{ paddingTop: '10px' }} />
