@@ -427,7 +427,6 @@ function QueueComparisonTab() {
   const isSharedBetter = waitTimeDiff > 0;
 
   // Current queue lengths (only count requests truly waiting, not being processed)
-  const sepQueueLength = separateRequests.filter(r => r.phase === 'in-queue' && !r.workerId).length;
   const sharedQueueLength = sharedRequests.filter(r => r.phase === 'in-queue' && !r.workerId).length;
 
   // Calculate AGGREGATE utilization (average over time)
@@ -661,8 +660,6 @@ function QueueComparisonTab() {
                 .filter(r => r.phase === 'falling')
                 .map(req => {
                   // Calculate x position based on target queue
-                  // Account for the 10px padding on left side
-                  const padding = 10; // matches .queues-zone padding
                   const availableWidth = 100; // percentage
                   const queueWidth = availableWidth / numQueues;
                   const xPos = queueWidth * req.targetQueue + queueWidth / 2;
