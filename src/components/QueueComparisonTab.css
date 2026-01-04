@@ -835,6 +835,21 @@
   background: #27ae60;
 }
 
+.moving-to-done-ball {
+  width: 12px;
+  height: 12px;
+  background: #27ae60;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+  z-index: 10;
+  opacity: 1;
+}
+
+.moving-to-done-ball.shared {
+  background: #27ae60;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+}
+
 @keyframes fadeIn {
   from {
     transform: scale(1.5);
