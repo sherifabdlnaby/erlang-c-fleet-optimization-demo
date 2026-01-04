@@ -298,6 +298,7 @@
   flex-direction: column;
   justify-content: center;
   min-height: 100px;
+  height: 100px;
   transition: all var(--transition-fast);
   border: 1px solid var(--border-default);
 }
@@ -323,6 +324,11 @@
   font-family: var(--font-mono);
   color: var(--accent);
   line-height: var(--leading-tight);
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ===== CHARTS SECTION ===== */
