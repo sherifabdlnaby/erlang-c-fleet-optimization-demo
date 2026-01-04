@@ -253,12 +253,6 @@ function QueueComparisonTab() {
             }
             return { ...req, progress: newProgress };
           }
-          if (req.phase === 'moving-to-done') {
-            // Update progress for moving animation
-            const elapsed = now - req.movingStartTime;
-            const newProgress = Math.min(1, elapsed / 300);
-            return { ...req, progress: newProgress };
-          }
           return req;
         });
 
@@ -302,21 +296,13 @@ function QueueComparisonTab() {
         }
 
         // Check for completed processing (use per-request service time)
-        workers.forEach((worker, workerIdx) => {
+        const completedRequestIds = [];
+        workers.forEach((worker) => {
           if (worker.busy && worker.startTime) {
             const req = updated.find(r => r.id === worker.requestId);
             const reqServiceTime = req?.serviceTimeMs || serviceMs;
             if (now - worker.startTime >= reqServiceTime) {
-              // Transition to moving-to-done phase first
-              updated = updated.map(r =>
-                r.id === worker.requestId ? { 
-                  ...r, 
-                  phase: 'moving-to-done', 
-                  movingStartTime: now,
-                  workerIndex: workerIdx,
-                  queueId: worker.queueId
-                } : r
-              );
+              completedRequestIds.push(worker.requestId);
               metricsRef.current.separate.processed++;
               worker.busy = false;
               worker.requestId = null;
@@ -327,16 +313,8 @@ function QueueComparisonTab() {
 
         setSeparateWorkers([...workers]);
 
-        // Transition moving-to-done requests to done after animation completes
-        updated = updated.map(req => {
-          if (req.phase === 'moving-to-done' && req.progress >= 1) {
-            return { ...req, phase: 'done', doneAt: now };
-          }
-          return req;
-        });
-
-        // Remove old done requests
-        return updated.filter(r => !(r.phase === 'done' && now - r.doneAt > 400));
+        // Remove completed requests
+        return updated.filter(r => !completedRequestIds.includes(r.id));
       });
 
       // Update SHARED requests
@@ -347,12 +325,6 @@ function QueueComparisonTab() {
             if (newProgress >= 1) {
               return { ...req, phase: 'in-queue', progress: 1, queuedAt: now };
             }
-            return { ...req, progress: newProgress };
-          }
-          if (req.phase === 'moving-to-done') {
-            // Update progress for moving animation
-            const elapsed = now - req.movingStartTime;
-            const newProgress = Math.min(1, elapsed / 300);
             return { ...req, progress: newProgress };
           }
           return req;
@@ -393,21 +365,13 @@ function QueueComparisonTab() {
         }
 
         // Check for completed processing (use per-request service time)
-        workers.forEach((worker, workerIdx) => {
+        const completedRequestIds = [];
+        workers.forEach((worker) => {
           if (worker.busy && worker.startTime) {
             const req = updated.find(r => r.id === worker.requestId);
             const reqServiceTime = req?.serviceTimeMs || serviceMs;
             if (now - worker.startTime >= reqServiceTime) {
-              // Transition to moving-to-done phase first
-              updated = updated.map(r =>
-                r.id === worker.requestId ? { 
-                  ...r, 
-                  phase: 'moving-to-done', 
-                  movingStartTime: now,
-                  progress: 0,
-                  workerIndex: workerIdx 
-                } : r
-              );
+              completedRequestIds.push(worker.requestId);
               metricsRef.current.shared.processed++;
               worker.busy = false;
               worker.requestId = null;
@@ -418,15 +382,8 @@ function QueueComparisonTab() {
 
         setSharedWorkers([...workers]);
 
-        // Transition moving-to-done requests to done after animation completes
-        updated = updated.map(req => {
-          if (req.phase === 'moving-to-done' && req.progress >= 1) {
-            return { ...req, phase: 'done', doneAt: now };
-          }
-          return req;
-        });
-
-        return updated.filter(r => !(r.phase === 'done' && now - r.doneAt > 400));
+        // Remove completed requests
+        return updated.filter(r => !completedRequestIds.includes(r.id));
       });
 
       // Sample utilization for aggregate calculation
@@ -778,48 +735,6 @@ function QueueComparisonTab() {
               })}
             </div>
 
-            {/* Moving requests from workers to done zone */}
-            {separateRequests
-              .filter(r => r.phase === 'moving-to-done')
-              .map(r => {
-                const progress = r.progress || 0;
-                const queueId = r.queueId || 0;
-                const workerIndex = r.workerIndex || 0;
-                const queueWidth = 100 / numQueues;
-                const queueCenterX = queueWidth * queueId + queueWidth / 2;
-                // Position within queue (workers are arranged horizontally)
-                const workersInQueue = workersPerQueue || 1;
-                const workerOffset = ((workerIndex % workersInQueue) - (workersInQueue - 1) / 2) * 8;
-                const workerX = queueCenterX + workerOffset;
-                const doneX = 50; // Center of done zone
-                const currentX = workerX + (doneX - workerX) * progress;
-                const startY = 85; // Approximate workers row bottom
-                const endY = 25; // Top of done zone
-                const currentY = startY + (endY - startY) * progress;
-                
-                return (
-                  <div
-                    key={r.id}
-                    className="moving-to-done-ball"
-                    style={{
-                      position: 'absolute',
-                      left: `${currentX}%`,
-                      bottom: `${currentY}px`,
-                      transform: 'translateX(-50%)',
-                      transition: 'none'
-                    }}
-                  />
-                );
-              })}
-
-            {/* Done zone */}
-            <div className="done-zone">
-              {separateRequests
-                .filter(r => r.phase === 'done')
-                .map(r => (
-                  <div key={r.id} className="done-ball" />
-                ))}
-            </div>
           </div>
 
           <div className="panel-callout warning">
@@ -916,46 +831,6 @@ function QueueComparisonTab() {
               </div>
             </div>
 
-            {/* Moving requests from workers to done zone */}
-            {sharedRequests
-              .filter(r => r.phase === 'moving-to-done')
-              .map(r => {
-                const progress = r.progress || 0;
-                const workerIndex = r.workerIndex || 0;
-                // Workers are arranged in a flex row, centered, with gap: 27px
-                // Approximate: spread workers across ~50% width, centered
-                const workersInRow = Math.min(totalWorkers, 6);
-                const spreadPercent = 50; // percentage spread
-                const workerXPercent = 50 + (workerIndex - (workersInRow - 1) / 2) * (spreadPercent / (workersInRow - 1 || 1));
-                const doneX = 50; // Center of done zone
-                const currentX = workerXPercent + (doneX - workerXPercent) * progress;
-                const startY = 85; // Approximate workers row bottom
-                const endY = 25; // Top of done zone
-                const currentY = startY + (endY - startY) * progress;
-                
-                return (
-                  <div
-                    key={r.id}
-                    className="moving-to-done-ball shared"
-                    style={{
-                      position: 'absolute',
-                      left: `${currentX}%`,
-                      bottom: `${currentY}px`,
-                      transform: 'translateX(-50%)',
-                      transition: 'none'
-                    }}
-                  />
-                );
-              })}
-
-            {/* Done zone */}
-            <div className="done-zone">
-              {sharedRequests
-                .filter(r => r.phase === 'done')
-                .map(r => (
-                  <div key={r.id} className="done-ball shared" />
-                ))}
-            </div>
           </div>
 
           <div className="panel-callout success">
