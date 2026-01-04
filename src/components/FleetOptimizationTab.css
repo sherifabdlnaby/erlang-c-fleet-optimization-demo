@@ -95,8 +95,6 @@
 /* ===== INPUT SECTIONS ===== */
 .input-section {
   margin-bottom: var(--space-5);
-  padding-bottom: var(--space-5);
-  border-bottom: 1px solid var(--border-subtle);
 }
 
 .input-section:last-child {

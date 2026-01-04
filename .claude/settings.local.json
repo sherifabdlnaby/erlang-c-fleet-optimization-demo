@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "Bash(curl:*)"
+    ]
+  }
+}

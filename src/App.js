@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import Tabs, { Tab } from './components/Tabs';
+import QueueComparisonTab from './components/QueueComparisonTab';
 import IndividualServerTab from './components/IndividualServerTab';
 import FleetOptimizationTab from './components/FleetOptimizationTab';
 
@@ -78,17 +79,24 @@ function App() {
       </header>
       <div className="App-content">
         <Tabs defaultTab={0}>
-          <Tab 
-            label="Individual Server Optimization" 
+          <Tab
+            label="Shared Queue vs Individual Queues"
+            id="queue-comparison"
+            description="Simulation. Visualize how shared queue minimize wait times and improve utilization."
+          >
+            <QueueComparisonTab />
+          </Tab>
+          <Tab
+            label="Individual Server Optimization"
             id="individual"
-            description="Optimize a Single Server. Perfect for understanding how worker count affects wait times, utilization, and queueing probability for one server instance."
+            description="Optimize a Single Server. Understand how worker count affects wait times, and utilization for one server instance."
           >
             <IndividualServerTab />
           </Tab>
-          <Tab 
-            label="Fleet Optimization" 
+          <Tab
+            label="Fleet Optimization"
             id="fleet"
-            description="Use this when planning multiple servers. Compare different fleet configurations, and understand the tradeoffs."
+            description="Simulation. Find the optimal number of servers and workers per server."
           >
             <FleetOptimizationTab />
           </Tab>

@@ -474,12 +474,14 @@ function MultiServerVisualization({ arrivalRate, serviceTime }) {
                     const processingReq = serverRequests.find(
                       r => r.status === 'processing' && r.workerIndex === workerIndex
                     );
+                    const justPickedUp = processingReq && (Date.now() - processingReq.processingStartTime < 300);
+                    const isIdle = !processingReq;
                     return (
                       <div
                         key={workerIndex}
-                        className={`worker-slot-multi ${processingReq ? 'busy' : 'idle'}`}
+                        className={`worker-slot-multi ${processingReq ? 'busy' : 'idle'}${justPickedUp ? ' flash' : ''}`}
                         style={{
-                          borderColor: server.color
+                          borderColor: isIdle ? '#b71c1c' : server.color
                         }}
                       >
                         {processingReq ? (
