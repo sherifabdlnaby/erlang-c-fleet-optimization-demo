@@ -4,7 +4,7 @@
    ============================================ */
 
 .configuration-manager {
-  margin-top: 0;
+  margin-top: 10px;
   margin-bottom: 0;
   padding: var(--space-5);
   background: var(--bg-surface);

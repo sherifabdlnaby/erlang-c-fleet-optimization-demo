@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Line,
   XAxis,
@@ -124,11 +124,19 @@ function FleetVisualizations({
       }
       
       if (maxFeasibleUtilization > 0 && minServersAtMaxUtil < Infinity) {
+        // Calculate probability delay at optimal config
+        const arrivalRatePerServerOptimal = totalArrivalRate / minServersAtMaxUtil;
+        const trafficIntensityPerServerOptimal = calculateTrafficIntensity(arrivalRatePerServerOptimal, serviceTime);
+        const probabilityDelayAtOptimal = trafficIntensityPerServerOptimal < workers 
+          ? erlangC(workers, trafficIntensityPerServerOptimal) * 100 
+          : 100;
+        
         data.push({
           workersPerServer: workers,
           maxFeasibleUtilization,
           minServersRequired: minServersAtMaxUtil,
           waitTimeAtOptimal: waitTimeAtMaxUtil,
+          probabilityDelayAtOptimal,
           totalWorkers: workers * minServersAtMaxUtil,
           totalCost: (costPerWorker * minServersAtMaxUtil * workers) + (perServerOverhead * minServersAtMaxUtil)
         });
@@ -176,6 +184,53 @@ function FleetVisualizations({
       return null;
     }
   }, [isValid, totalArrivalRate, serviceTime, numServers, workersPerServer, maxWaitTimeMs, maxProbabilityDelay, costPerWorker, perServerOverhead, optimizationChainData]);
+
+  // State for toggling line visibility - must be before any early returns
+  const [visibleLines, setVisibleLines] = useState({
+    waitTime: true,
+    utilization: true,
+    servers: true,
+    waitProbability: false,
+    totalCost: true
+  });
+
+  const toggleLine = (lineKey) => {
+    setVisibleLines(prev => ({ ...prev, [lineKey]: !prev[lineKey] }));
+  };
+
+  // Line configuration with metadata
+  const lineConfig = {
+    waitTime: { 
+      name: 'Wait Time', 
+      color: '#f2994a', 
+      lowerIsBetter: true,
+      unit: 'ms'
+    },
+    utilization: { 
+      name: 'Max Utilization', 
+      color: '#0EA5E9', 
+      lowerIsBetter: false,
+      unit: '%'
+    },
+    servers: { 
+      name: 'Min Servers', 
+      color: '#27ae60', 
+      lowerIsBetter: true,
+      unit: ''
+    },
+    waitProbability: { 
+      name: 'Wait Probability', 
+      color: '#9b59b6', 
+      lowerIsBetter: true,
+      unit: '%'
+    },
+    totalCost: { 
+      name: 'Total Cost', 
+      color: '#e74c3c', 
+      lowerIsBetter: true,
+      unit: '$'
+    }
+  };
 
   if (!isValid) {
     return (
@@ -269,12 +324,10 @@ function FleetVisualizations({
             <br />
             <span style={{ color: '#27ae60', fontWeight: '500' }}>All configurations shown meet SLA requirements.</span>
           </p>
+
           <div style={{ position: 'relative', width: '100%', height: '465px' }}>
-            <div style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', transformOrigin: 'center', fontSize: '14px', fontWeight: '500', color: '#6b6b6b', zIndex: 1 }}>
-              Wait Time (ms)
-            </div>
             <ResponsiveContainer width="100%" height={465}>
-              <ComposedChart data={optimizationChainData} margin={{ top: 10, right: 20, left: 60, bottom: 5 }}>
+              <ComposedChart data={optimizationChainData} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(55,53,47,0.06)" />
                 <XAxis
                   dataKey="workersPerServer"
@@ -293,14 +346,10 @@ function FleetVisualizations({
                   tick={{ fill: '#6b6b6b' }}
                 />
                 <YAxis
-                  yAxisId="utilization"
+                  yAxisId="percentage"
                   orientation="right"
                   domain={[0, 100]}
-                  tickFormatter={(value) => {
-                    const num = Number(value);
-                    const formatted = num % 1 === 0 ? num.toString() : num.toFixed(2);
-                    return `${formatted}%`;
-                  }}
+                  tickFormatter={(value) => `${value}%`}
                   width={50}
                   stroke="#c7c7c7"
                   tick={{ fill: '#6b6b6b' }}
@@ -311,15 +360,37 @@ function FleetVisualizations({
                   domain={['dataMin', 'dataMax']}
                   tickFormatter={(value) => {
                     const num = Number(value);
-                    return num % 1 === 0 ? num.toString() : num.toFixed(2);
+                    return num % 1 === 0 ? num.toString() : num.toFixed(0);
                   }}
                   width={50}
                   stroke="#c7c7c7"
                   tick={{ fill: '#6b6b6b' }}
+                  hide={true}
+                />
+                <YAxis
+                  yAxisId="cost"
+                  orientation="right"
+                  domain={['dataMin', 'dataMax']}
+                  tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`}
+                  width={60}
+                  stroke="#c7c7c7"
+                  tick={{ fill: '#6b6b6b' }}
+                  hide={true}
                 />
               <Tooltip
                 content={({ active, payload, label }) => {
                   if (!active || !payload || !payload.length) return null;
+                  const dataPoint = payload[0]?.payload;
+                  if (!dataPoint) return null;
+                  
+                  const tooltipItems = [
+                    { key: 'waitTime', value: dataPoint.waitTimeAtOptimal, format: (v) => `${v?.toFixed(2)} ms` },
+                    { key: 'utilization', value: dataPoint.maxFeasibleUtilization, format: (v) => `${v?.toFixed(2)}%` },
+                    { key: 'servers', value: dataPoint.minServersRequired, format: (v) => `${v} servers` },
+                    { key: 'waitProbability', value: dataPoint.probabilityDelayAtOptimal, format: (v) => `${v?.toFixed(2)}%` },
+                    { key: 'totalCost', value: dataPoint.totalCost, format: (v) => `$${v?.toLocaleString()}` }
+                  ];
+                  
                   return (
                     <div style={{
                       backgroundColor: '#ffffff',
@@ -331,24 +402,36 @@ function FleetVisualizations({
                       <div style={{ color: '#37352f', fontWeight: '600', marginBottom: '8px', fontSize: '13px' }}>
                         {label} workers/server
                       </div>
-                      {payload.map((entry, index) => {
-                        const num = Number(entry.value);
-                        const rounded = Math.round(num * 100) / 100;
-                        let formattedValue = rounded.toFixed(2);
-                        if (entry.name.includes('Utilization')) formattedValue += '%';
-                        else if (entry.name.includes('Wait Time')) formattedValue += ' ms';
-                        else if (entry.name.includes('Servers')) formattedValue += ' servers';
+                      {tooltipItems.map((item) => {
+                        const config = lineConfig[item.key];
                         return (
-                          <div key={index} style={{
+                          <div key={item.key} style={{
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             gap: '16px',
                             padding: '4px 0',
-                            fontSize: '12px'
+                            fontSize: '12px',
+                            opacity: visibleLines[item.key] ? 1 : 0.5
                           }}>
-                            <span style={{ color: '#6b6b6b' }}>{entry.name.replace(' at Optimal Config', '').replace(' (%)', '').replace(' (ms)', '')}</span>
-                            <span style={{ color: entry.color, fontWeight: '600' }}>{formattedValue}</span>
+                            <span style={{ 
+                              color: '#6b6b6b',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}>
+                              {config.name}
+                              <span style={{
+                                fontSize: '9px',
+                                color: config.lowerIsBetter ? '#27ae60' : '#0EA5E9',
+                                fontWeight: '600'
+                              }}>
+                                {config.lowerIsBetter ? '↓' : '↑'}
+                              </span>
+                            </span>
+                            <span style={{ color: config.color, fontWeight: '600' }}>
+                              {item.format(item.value)}
+                            </span>
                           </div>
                         );
                       })}
@@ -356,7 +439,6 @@ function FleetVisualizations({
                   );
                 }}
               />
-              <Legend wrapperStyle={{ paddingTop: '10px' }} />
               <ReferenceLine
                 yAxisId="left"
                 y={maxWaitTimeMs}
@@ -364,36 +446,66 @@ function FleetVisualizations({
                 strokeDasharray="3 3"
                 label={{ value: 'SLA Threshold', fill: '#f2994a' }}
               />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="waitTimeAtOptimal"
-                stroke="#f2994a"
-                strokeWidth={2}
-                name="Wait Time at Optimal Config (ms)"
-                dot={{ r: 2, fill: '#ffffff', stroke: '#f2994a', strokeWidth: 1.5 }}
-                activeDot={{ r: 4, fill: '#f2994a', stroke: '#ffffff', strokeWidth: 2 }}
-              />
-              <Line
-                yAxisId="utilization"
-                type="monotone"
-                dataKey="maxFeasibleUtilization"
-                stroke="#0EA5E9"
-                strokeWidth={2}
-                name="Max Feasible Utilization (%)"
-                dot={{ r: 2, fill: '#ffffff', stroke: '#0EA5E9', strokeWidth: 1.5 }}
-                activeDot={{ r: 4, fill: '#0EA5E9', stroke: '#ffffff', strokeWidth: 2 }}
-              />
-              <Line
-                yAxisId="servers"
-                type="monotone"
-                dataKey="minServersRequired"
-                stroke="#27ae60"
-                strokeWidth={2}
-                name="Min Servers Required"
-                dot={{ r: 2, fill: '#ffffff', stroke: '#27ae60', strokeWidth: 1.5 }}
-                activeDot={{ r: 4, fill: '#27ae60', stroke: '#ffffff', strokeWidth: 2 }}
-              />
+              {visibleLines.waitTime && (
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="waitTimeAtOptimal"
+                  stroke={lineConfig.waitTime.color}
+                  strokeWidth={2}
+                  name="Wait Time"
+                  dot={{ r: 2, fill: '#ffffff', stroke: lineConfig.waitTime.color, strokeWidth: 1.5 }}
+                  activeDot={{ r: 4, fill: lineConfig.waitTime.color, stroke: '#ffffff', strokeWidth: 2 }}
+                />
+              )}
+              {visibleLines.utilization && (
+                <Line
+                  yAxisId="percentage"
+                  type="monotone"
+                  dataKey="maxFeasibleUtilization"
+                  stroke={lineConfig.utilization.color}
+                  strokeWidth={2}
+                  name="Max Utilization"
+                  dot={{ r: 2, fill: '#ffffff', stroke: lineConfig.utilization.color, strokeWidth: 1.5 }}
+                  activeDot={{ r: 4, fill: lineConfig.utilization.color, stroke: '#ffffff', strokeWidth: 2 }}
+                />
+              )}
+              {visibleLines.servers && (
+                <Line
+                  yAxisId="servers"
+                  type="monotone"
+                  dataKey="minServersRequired"
+                  stroke={lineConfig.servers.color}
+                  strokeWidth={2}
+                  name="Min Servers"
+                  dot={{ r: 2, fill: '#ffffff', stroke: lineConfig.servers.color, strokeWidth: 1.5 }}
+                  activeDot={{ r: 4, fill: lineConfig.servers.color, stroke: '#ffffff', strokeWidth: 2 }}
+                />
+              )}
+              {visibleLines.waitProbability && (
+                <Line
+                  yAxisId="percentage"
+                  type="monotone"
+                  dataKey="probabilityDelayAtOptimal"
+                  stroke={lineConfig.waitProbability.color}
+                  strokeWidth={2}
+                  name="Wait Probability"
+                  dot={{ r: 2, fill: '#ffffff', stroke: lineConfig.waitProbability.color, strokeWidth: 1.5 }}
+                  activeDot={{ r: 4, fill: lineConfig.waitProbability.color, stroke: '#ffffff', strokeWidth: 2 }}
+                />
+              )}
+              {visibleLines.totalCost && (
+                <Line
+                  yAxisId="cost"
+                  type="monotone"
+                  dataKey="totalCost"
+                  stroke={lineConfig.totalCost.color}
+                  strokeWidth={2}
+                  name="Total Cost"
+                  dot={{ r: 2, fill: '#ffffff', stroke: lineConfig.totalCost.color, strokeWidth: 1.5 }}
+                  activeDot={{ r: 4, fill: lineConfig.totalCost.color, stroke: '#ffffff', strokeWidth: 2 }}
+                />
+              )}
               {currentAnalysis && currentAnalysis.meetsSLA && (
                 <ReferenceLine
                   yAxisId="left"
@@ -406,6 +518,59 @@ function FleetVisualizations({
               )}
               </ComposedChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Custom Legend with Toggle */}
+          <div style={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: '8px', 
+            marginTop: '16px',
+            padding: '12px',
+            background: 'rgba(55,53,47,0.02)',
+            borderRadius: '8px',
+            justifyContent: 'center'
+          }}>
+            {Object.entries(lineConfig).map(([key, config]) => (
+              <button
+                key={key}
+                onClick={() => toggleLine(key)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  border: `1px solid ${visibleLines[key] ? config.color : '#ccc'}`,
+                  borderRadius: '6px',
+                  background: visibleLines[key] ? `${config.color}15` : '#f5f5f5',
+                  cursor: 'pointer',
+                  opacity: visibleLines[key] ? 1 : 0.5,
+                  transition: 'all 0.2s ease',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}
+              >
+                <span style={{
+                  width: '12px',
+                  height: '3px',
+                  background: config.color,
+                  borderRadius: '2px'
+                }} />
+                <span style={{ color: visibleLines[key] ? config.color : '#666' }}>
+                  {config.name}
+                </span>
+                <span style={{
+                  fontSize: '10px',
+                  color: config.lowerIsBetter ? '#27ae60' : '#0EA5E9',
+                  background: config.lowerIsBetter ? 'rgba(39,174,96,0.1)' : 'rgba(14,165,233,0.1)',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  fontWeight: '600'
+                }}>
+                  {config.lowerIsBetter ? '↓ lower better' : '↑ higher better'}
+                </span>
+              </button>
+            ))}
           </div>
         </div>
         )}
