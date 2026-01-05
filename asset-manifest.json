@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/erlang-c-fleet-optimization-demo/static/css/main.62ddb0bf.css",
-    "main.js": "/erlang-c-fleet-optimization-demo/static/js/main.e2459047.js",
+    "main.css": "/erlang-c-fleet-optimization-demo/static/css/main.f1be779f.css",
+    "main.js": "/erlang-c-fleet-optimization-demo/static/js/main.9a74ec5d.js",
     "index.html": "/erlang-c-fleet-optimization-demo/index.html",
-    "main.62ddb0bf.css.map": "/erlang-c-fleet-optimization-demo/static/css/main.62ddb0bf.css.map",
-    "main.e2459047.js.map": "/erlang-c-fleet-optimization-demo/static/js/main.e2459047.js.map"
+    "main.f1be779f.css.map": "/erlang-c-fleet-optimization-demo/static/css/main.f1be779f.css.map",
+    "main.9a74ec5d.js.map": "/erlang-c-fleet-optimization-demo/static/js/main.9a74ec5d.js.map"
   },
   "entrypoints": [
-    "static/css/main.62ddb0bf.css",
-    "static/js/main.e2459047.js"
+    "static/css/main.f1be779f.css",
+    "static/js/main.9a74ec5d.js"
   ]
 }
