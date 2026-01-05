@@ -40,7 +40,7 @@ function QueueComparisonTab() {
   const minWorkersPerQueue = 1;
   const maxWorkersPerQueue = 4;
   const [minArrivalRate, setMinArrivalRate] = useState(0.5);
-  const [maxArrivalRate, setMaxArrivalRate] = useState(6);
+  const [maxArrivalRate, setMaxArrivalRate] = useState(12);
   const [minServiceTime, setMinServiceTime] = useState(0.5);
   const [maxServiceTime, setMaxServiceTime] = useState(3);
   const [minStdDev, setMinStdDev] = useState(0);
@@ -445,25 +445,12 @@ function QueueComparisonTab() {
             Watch how a single shared queue with N workers outperforms N separate queues
           </p>
         </div>
-        <div className="simulation-controls">
-          <button
-            className={`control-btn ${isRunning ? 'pause' : 'play'}`}
-            onClick={() => setIsRunning(!isRunning)}
-          >
-            {isRunning ? 'Pause' : 'Play'}
-          </button>
-          <button className="control-btn reset" onClick={resetSimulation}>
-            Reset
-          </button>
-        </div>
       </div>
 
       {/* Controls */}
-      <div className="parameters-panel">
-        <h3>Simulation Parameters</h3>
-
-
-        <div className="input-section">
+      <div className="controls-layout">
+        <div className="parameters-panel">
+          <div className="input-section">
           <h4 className="input-section-title">Queue Configuration</h4>
 
           <div className="input-group">
@@ -584,12 +571,41 @@ function QueueComparisonTab() {
             </div>
           </div>
         </div>
+
+        <div className="simulation-controls">
+          <button
+            className={`control-btn ${isRunning ? 'pause' : 'play'}`}
+            onClick={() => setIsRunning(!isRunning)}
+          >
+            {isRunning ? 'Pause' : 'Play'}
+          </button>
+          <button className="control-btn reset" onClick={resetSimulation}>
+            Reset
+          </button>
+        </div>
+        </div>
+
+        <div className="tips-panel">
+          <h3>Notes</h3>
+          <div className="tips-content">
+            <ul className="notes-list">
+              <li>Utilization depends on <strong>workers</strong>, <strong>service time</strong>, and <strong>variance</strong>.</li>
+              <li>At <strong>very low utilization</strong>, differences between shared and individual queues are negligible.</li>
+              <li>At <strong>100% utilization</strong> or when requests exceed processing capacity, differences can't be measured.</li>
+              <li>Differences are most visible at <strong>60-80% utilization</strong>.</li>
+              <li>As utilization increases, <strong>shared queues show lower average wait times</strong>.</li>
+            </ul>
+            <div className="notes-purpose">
+              <p>This visualization demonstrates how idle workers <span className="idle-worker-icon">💤</span> in separate queues can't help with work waiting in other queues, while shared queues allow any free worker to take the next available request.</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Metrics */}
       <div className="metrics-comparison">
         <div className="metric-card separate">
-          <div className="metric-header">❌ {numQueues} Queues × {workersPerQueue} Workers</div>
+          <div className="metric-header">{numQueues} Queues × {workersPerQueue} Workers</div>
           <div className="metric-values">
             <div className="metric-item has-tooltip" data-tooltip="Average time requests spend waiting in queue before being processed. Calculated as: Total Wait Time / Number of Processed Requests">
               <span className="metric-label">Avg Wait</span>
