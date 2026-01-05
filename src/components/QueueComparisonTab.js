@@ -408,11 +408,11 @@ function QueueComparisonTab() {
     return () => cancelAnimationFrame(animationRef.current);
   }, [isRunning, arrivalRate, serviceTime, serviceTimeStdDev, numQueues, workersPerQueue, totalWorkers]);
 
-  // Calculate stats
-  const avgWaitSep = metrics.separate.processed > 0
-    ? metrics.separate.totalWait / metrics.separate.processed : 0;
-  const avgWaitShared = metrics.shared.processed > 0
-    ? metrics.shared.totalWait / metrics.shared.processed : 0;
+  // Calculate stats (conditional wait time - average for requests that actually waited)
+  const avgWaitSep = metrics.separate.requestsWaited > 0
+    ? metrics.separate.totalWait / metrics.separate.requestsWaited : 0;
+  const avgWaitShared = metrics.shared.requestsWaited > 0
+    ? metrics.shared.totalWait / metrics.shared.requestsWaited : 0;
 
   // Calculate probability of waiting (% of requests that had to wait)
   const probWaitSep = metrics.separate.processed > 0
@@ -607,7 +607,7 @@ function QueueComparisonTab() {
         <div className="metric-card separate">
           <div className="metric-header">{numQueues} Queues × {workersPerQueue} Workers</div>
           <div className="metric-values">
-            <div className="metric-item has-tooltip" data-tooltip="Average time requests spend waiting in queue before being processed. Calculated as: Total Wait Time / Number of Processed Requests">
+            <div className="metric-item has-tooltip" data-tooltip="Average time requests spend waiting in queue (for those that had to wait). Calculated as: Total Wait Time / Number of Requests That Waited">
               <span className="metric-label">Avg Wait</span>
               <span className="metric-value">{avgWaitSep.toFixed(0)}ms</span>
             </div>
@@ -638,7 +638,7 @@ function QueueComparisonTab() {
         <div className="metric-card shared">
           <div className="metric-header">1 Queue × {totalWorkers} Workers</div>
           <div className="metric-values">
-            <div className="metric-item has-tooltip" data-tooltip="Average time requests spend waiting in queue before being processed. Calculated as: Total Wait Time / Number of Processed Requests">
+            <div className="metric-item has-tooltip" data-tooltip="Average time requests spend waiting in queue (for those that had to wait). Calculated as: Total Wait Time / Number of Requests That Waited">
               <span className="metric-label">Avg Wait</span>
               <span className="metric-value">{avgWaitShared.toFixed(0)}ms</span>
             </div>
