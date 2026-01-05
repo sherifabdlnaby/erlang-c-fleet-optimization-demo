@@ -17,7 +17,7 @@ You can embed the Erlang C Visualizer in your articles, blog posts, or websites 
 
 ## Responsive Embed (Recommended)
 
-For responsive embedding that adapts to different screen sizes:
+For responsive embedding that adapts to different screen sizes: Hello 
 
 ```html
 <div style="position: relative; padding-bottom: 75%; height: 0; overflow: hidden; max-width: 100%;">
